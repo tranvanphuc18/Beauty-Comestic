@@ -1,0 +1,41 @@
+﻿@model IEnumerable<MyPham_Models.Product>
+
+@{
+    ViewBag.Title = "Danh sách sản phẩm";
+}
+
+<div class="container">
+    <h2>Danh sách sản phẩm</h2>
+
+    <div class="row">
+        @foreach (var product in Model)
+        {
+            <div class="col-md-4 col-sm-6">
+                <div class="card product-card">
+                    <img src="@Url.Content("~/Images/" + product.Image)"
+                         class="product-image"
+                         alt="@product.Name" />
+
+
+                    <div class="card-body">
+                        <h4>@product.Name</h4>
+
+                        <p>Thương hiệu: @product.Brand</p>
+
+                        <p>
+                            Giá: @product.Price.ToString("N0") VNĐ
+                        
+
+                        @Html.ActionLink(
+                            "Xem chi tiết sản phẩm",
+                            "Detail",
+                            "Product",
+                            new { id = product.Id },
+                            new { @class = "btn btn-primary" }
+                        )
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
