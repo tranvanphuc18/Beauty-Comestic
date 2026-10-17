@@ -13,5 +13,8 @@ namespace MyPham_Models
         public decimal Price { get; set; }
         public string Image { get; set; }
         public string Description { get; set; }
+
+        // Loại da phù hợp: oily, dry, combination, sensitive
+        public string[] SkinTypes { get; set; }
     }
 }

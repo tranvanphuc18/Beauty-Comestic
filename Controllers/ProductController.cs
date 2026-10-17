@@ -16,7 +16,8 @@ namespace nv3.Controllers
                 Brand = "CeraVe",
                 Price = 250000,
                 Image = "ceraVe.jpg",
-                Description = "Sữa rửa mặt dịu nhẹ giúp làm sạch da."
+                Description = "Sữa rửa mặt dịu nhẹ giúp làm sạch da.",
+                SkinTypes = new[] { "oily", "combination" }
             },
             new Product
             {
@@ -25,7 +26,8 @@ namespace nv3.Controllers
                 Brand = "Klairs",
                 Price = 320000,
                 Image = "klairs.jpg",
-                Description = "Toner giúp cấp ẩm và làm dịu da."
+                Description = "Toner giúp cấp ẩm và làm dịu da.",
+                SkinTypes = new[] { "dry", "combination", "sensitive" }
             },
             new Product
             {
@@ -34,7 +36,8 @@ namespace nv3.Controllers
                 Brand = "Melano CC",
                 Price = 280000,
                 Image = "melano.jpg",
-                Description = "Serum chăm sóc da với Vitamin C."
+                Description = "Serum chăm sóc da với Vitamin C.",
+                SkinTypes = new[] { "oily", "combination" }
             },
             new Product
             {
@@ -43,7 +46,8 @@ namespace nv3.Controllers
                 Brand = "La Roche-Posay",
                 Price = 450000,
                 Image = "larocheposay.jpg",
-                Description = "Kem dưỡng ẩm hỗ trợ phục hồi da."
+                Description = "Kem dưỡng ẩm hỗ trợ phục hồi da.",
+                SkinTypes = new[] { "dry", "sensitive" }
             },
             new Product
             {
@@ -52,7 +56,8 @@ namespace nv3.Controllers
                 Brand = "Anessa",
                 Price = 400000,
                 Image = "anessa.jpg",
-                Description = "Kem chống nắng dùng hằng ngày."
+                Description = "Kem chống nắng dùng hằng ngày.",
+                SkinTypes = new[] { "oily", "dry", "combination", "sensitive" }
             },
             new Product
             {
@@ -61,13 +66,35 @@ namespace nv3.Controllers
                 Brand = "YSL",
                 Price = 950000,
                 Image = "ysl.jpg",
-                Description = "Son môi cao cấp với thiết kế sang trọng."
+                Description = "Son môi cao cấp với thiết kế sang trọng.",
+                SkinTypes = new string[0]
             }
         };
 
-        public ActionResult Index()
+        public ActionResult Index(string[] skinTypes, string[] brands)
         {
-            return View(products);
+            skinTypes = skinTypes ?? new string[0];
+            brands = brands ?? new string[0];
+
+            IEnumerable<Product> result = products;
+
+            // Lọc theo loại da: sản phẩm phù hợp với ít nhất 1 loại da đã chọn
+            if (skinTypes.Length > 0)
+            {
+                result = result.Where(p => (p.SkinTypes ?? new string[0]).Intersect(skinTypes).Any());
+            }
+
+            // Lọc theo thương hiệu: "La Roche-Posay" -> "la-roche-posay"
+            if (brands.Length > 0)
+            {
+                result = result.Where(p => brands.Contains(p.Brand.ToLower().Replace(" ", "-")));
+            }
+
+            // Để form nhớ các ô đã tick sau khi tải lại trang
+            ViewBag.SelectedSkinTypes = skinTypes;
+            ViewBag.SelectedBrands = brands;
+
+            return View(result.ToList());
         }
 
         public ActionResult Detail(int id)

@@ -1,4 +1,5 @@
-﻿
+﻿@using System.Linq
+
 @{
     var skinTypes = new[]
     {
@@ -8,15 +9,20 @@
         new { Value = "sensitive",   Label = "Da nhạy cảm" }
     };
 
+    // Value = tên thương hiệu viết thường, thay dấu cách bằng "-"
+    // (phải khớp với cách so sánh trong ProductController)
     var brands = new[]
     {
-        new { Value = "la-roche-posay", Label = "La Roche-Posay" },
         new { Value = "cerave",         Label = "CeraVe" },
-        new { Value = "innisfree",      Label = "Innisfree" },
-        new { Value = "cocoon",         Label = "Cocoon" },
-        new { Value = "the-ordinary",   Label = "The Ordinary" },
-        new { Value = "some-by-mi",     Label = "Some By Mi" }
+        new { Value = "klairs",         Label = "Klairs" },
+        new { Value = "melano-cc",      Label = "Melano CC" },
+        new { Value = "la-roche-posay", Label = "La Roche-Posay" },
+        new { Value = "anessa",         Label = "Anessa" },
+        new { Value = "ysl",            Label = "YSL" }
     };
+
+    var selectedSkinTypes = (ViewBag.SelectedSkinTypes as string[]) ?? new string[0];
+    var selectedBrands = (ViewBag.SelectedBrands as string[]) ?? new string[0];
 }
 
 <link rel="stylesheet" href="@Url.Content("~/Content/product-filter.css")" />
@@ -57,7 +63,8 @@
                 {
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox"
-                               name="skinTypes" value="@s.Value" id="skin-@s.Value" />
+                               name="skinTypes" value="@s.Value" id="skin-@s.Value"
+                               checked="@selectedSkinTypes.Contains(s.Value)" />
                         <label class="form-check-label" for="skin-@s.Value">@s.Label</label>
                     </div>
                 }
@@ -70,7 +77,8 @@
                     {
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox"
-                                   name="brands" value="@b.Value" id="brand-@b.Value" />
+                                   name="brands" value="@b.Value" id="brand-@b.Value"
+                                   checked="@selectedBrands.Contains(b.Value)" />
                             <label class="form-check-label" for="brand-@b.Value">@b.Label</label>
                         </div>
                     }
@@ -79,7 +87,7 @@
 
             <div class="d-grid gap-2">
                 <button type="submit" class="btn btn-primary">Áp dụng bộ lọc</button>
-                <button type="reset" class="btn btn-outline-secondary">Xóa bộ lọc</button>
+                <a href="@Url.Action("Index", "Product")" class="btn btn-outline-secondary">Xóa bộ lọc</a>
             </div>
         }
     </div>

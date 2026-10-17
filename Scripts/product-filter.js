@@ -1,11 +1,9 @@
-﻿
-document.addEventListener('DOMContentLoaded', function () {
+﻿document.addEventListener('DOMContentLoaded', function () {
     'use strict';
 
     var form = document.getElementById('product-filter-form');
     if (!form) return;
 
-    var panel = document.getElementById('product-filter');
     var chipBox = document.getElementById('product-filter-chips');
     var countBadge = document.getElementById('product-filter-count');
 
@@ -18,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return label ? label.textContent.trim() : input.value;
     }
 
+    // Hiện các "chip" của bộ lọc đang chọn; bấm vào chip để bỏ lọc đó
     function render() {
         var inputs = checkedInputs();
         chipBox.textContent = '';
@@ -30,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
             chip.setAttribute('aria-label', 'Bỏ chọn ' + labelOf(input));
             chip.addEventListener('click', function () {
                 input.checked = false;
-                render();
+                form.submit();
             });
             chipBox.appendChild(chip);
         });
@@ -43,21 +42,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function closePanelOnMobile() {
-        if (!panel || !window.bootstrap) return;
-        var instance = window.bootstrap.Offcanvas.getInstance(panel);
-        if (instance) instance.hide();
-    }
-
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        render();
-        closePanelOnMobile();
-    });
-
-    form.addEventListener('reset', function () {
-        setTimeout(render, 0);
-    });
-
+    // Không chặn submit nữa: form gửi GET về /Product/Index để server lọc
     render();
 });
