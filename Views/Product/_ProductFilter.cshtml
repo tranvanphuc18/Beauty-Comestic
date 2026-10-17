@@ -1,0 +1,88 @@
+﻿
+@{
+    var skinTypes = new[]
+    {
+        new { Value = "oily",        Label = "Da dầu" },
+        new { Value = "dry",         Label = "Da khô" },
+        new { Value = "combination", Label = "Da hỗn hợp" },
+        new { Value = "sensitive",   Label = "Da nhạy cảm" }
+    };
+
+    var brands = new[]
+    {
+        new { Value = "la-roche-posay", Label = "La Roche-Posay" },
+        new { Value = "cerave",         Label = "CeraVe" },
+        new { Value = "innisfree",      Label = "Innisfree" },
+        new { Value = "cocoon",         Label = "Cocoon" },
+        new { Value = "the-ordinary",   Label = "The Ordinary" },
+        new { Value = "some-by-mi",     Label = "Some By Mi" }
+    };
+}
+
+<link rel="stylesheet" href="@Url.Content("~/Content/product-filter.css")" />
+
+<button class="btn btn-outline-primary product-filter__toggle d-lg-none w-100 mb-3"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#product-filter"
+        aria-controls="product-filter">
+    Bộ lọc
+    <span id="product-filter-count" class="badge rounded-pill product-filter__count d-none">0</span>
+</button>
+
+<aside class="offcanvas-lg offcanvas-start product-filter"
+       id="product-filter"
+       tabindex="-1"
+       aria-labelledby="product-filter-title">
+
+    <div class="offcanvas-header d-lg-none">
+        <h2 class="offcanvas-title h5" id="product-filter-title">Bộ lọc sản phẩm</h2>
+        <button type="button" class="btn-close"
+                data-bs-dismiss="offcanvas"
+                data-bs-target="#product-filter"
+                aria-label="Đóng bộ lọc"></button>
+    </div>
+
+    <div class="offcanvas-body">
+        @using (Html.BeginForm("Index", "Product", FormMethod.Get,
+            new { id = "product-filter-form", @class = "product-filter__form w-100", novalidate = "novalidate" }))
+        {
+            <h2 class="product-filter__heading h5 d-none d-lg-block">Bộ lọc sản phẩm</h2>
+
+            <div id="product-filter-chips" class="product-filter__chips d-flex flex-wrap gap-2 mb-3" hidden></div>
+
+            <fieldset class="product-filter__group mb-4">
+                <legend class="product-filter__legend">Loại da</legend>
+                @foreach (var s in skinTypes)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox"
+                               name="skinTypes" value="@s.Value" id="skin-@s.Value" />
+                        <label class="form-check-label" for="skin-@s.Value">@s.Label</label>
+                    </div>
+                }
+            </fieldset>
+
+            <fieldset class="product-filter__group mb-4">
+                <legend class="product-filter__legend">Thương hiệu</legend>
+                <div class="product-filter__brands">
+                    @foreach (var b in brands)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox"
+                                   name="brands" value="@b.Value" id="brand-@b.Value" />
+                            <label class="form-check-label" for="brand-@b.Value">@b.Label</label>
+                        </div>
+                    }
+                </div>
+            </fieldset>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Áp dụng bộ lọc</button>
+                <button type="reset" class="btn btn-outline-secondary">Xóa bộ lọc</button>
+            </div>
+        }
+    </div>
+</aside>
+
+<script src="@Url.Content("~/Scripts/product-filter.js")"></script>
