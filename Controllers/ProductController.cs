@@ -1,4 +1,5 @@
-﻿using MyPham_Models;
+﻿
+using MyPham_Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
@@ -71,28 +72,62 @@ namespace nv3.Controllers
             }
         };
 
-        public ActionResult Index(string[] skinTypes, string[] brands)
+        public ActionResult Index(
+            string category,
+            string[] skinTypes,
+            string[] brands)
         {
             skinTypes = skinTypes ?? new string[0];
             brands = brands ?? new string[0];
 
             IEnumerable<Product> result = products;
 
-            // Lọc theo loại da: sản phẩm phù hợp với ít nhất 1 loại da đã chọn
+            // Lọc theo danh mục
+            if (!string.IsNullOrEmpty(category))
+            {
+                switch (category.ToLower())
+                {
+                    case "cham-soc-da":
+                        result = result.Where(p =>
+                            p.Id == 1 || p.Id == 2 ||
+                            p.Id == 3 || p.Id == 4);
+                        break;
+
+                    case "trang-diem":
+                        result = result.Where(p => p.Id == 6);
+                        break;
+
+                    case "chong-nang":
+                        result = result.Where(p => p.Id == 5);
+                        break;
+
+                    case "duong-am":
+                        result = result.Where(p =>
+                            p.Id == 2 || p.Id == 4);
+                        break;
+                }
+            }
+
+            // Lọc theo loại da
             if (skinTypes.Length > 0)
             {
-                result = result.Where(p => (p.SkinTypes ?? new string[0]).Intersect(skinTypes).Any());
+                result = result.Where(p =>
+                    (p.SkinTypes ?? new string[0])
+                    .Intersect(skinTypes)
+                    .Any());
             }
 
-            // Lọc theo thương hiệu: "La Roche-Posay" -> "la-roche-posay"
+            // Lọc theo thương hiệu
             if (brands.Length > 0)
             {
-                result = result.Where(p => brands.Contains(p.Brand.ToLower().Replace(" ", "-")));
+                result = result.Where(p =>
+                    brands.Contains(
+                        p.Brand.ToLower().Replace(" ", "-")));
             }
 
-            // Để form nhớ các ô đã tick sau khi tải lại trang
             ViewBag.SelectedSkinTypes = skinTypes;
             ViewBag.SelectedBrands = brands;
+            ViewBag.SelectedCategory = category;
 
             return View(result.ToList());
         }

@@ -4,50 +4,109 @@
     ViewBag.Title = "Danh sách sản phẩm";
 }
 
-<div class="container">
-    <h2>Danh sách sản phẩm</h2>
+<div class="container product-page">
+    <h2 class="mb-4">Danh sách sản phẩm</h2>
 
     <div class="row">
-        <div class="col-lg-3">
+        <div class="col-lg-3 mb-4">
             @Html.Partial("_ProductFilter")
         </div>
 
         <div class="col-lg-9">
-            @if (!Model.Any())
+            @if (Model == null || !Model.Any())
             {
                 <p>Không có sản phẩm nào phù hợp với bộ lọc.</p>
             }
+            else
+            {
+                <div class="row g-4">
+                    @foreach (var product in Model)
+                    {
+                        <div class="col-md-6 col-xl-4">
+                            <div class="card product-card">
+                                <img src="@Url.Content("~/Images/" + product.Image)"
+                                     class="product-image"
+                                     alt="@product.Name" />
 
-            <div class="row">
-                @foreach (var product in Model)
-                {
-                    <div class="col-md-6 col-xl-4">
-                        <div class="card product-card">
-                            <img src="@Url.Content("~/Images/" + product.Image)"
-                                 class="product-image"
-                                 alt="@product.Name" />
+                                <div class="card-body">
+                                    <h4>@product.Name</h4>
 
-                            <div class="card-body">
-                                <h4>@product.Name</h4>
+                                    <p>Thương hiệu: @product.Brand</p>
 
-                                <p>Thương hiệu: @product.Brand</p>
+                                    <p class="product-price">
+                                        Giá: @product.Price.ToString("N0") VNĐ
+                                    </p>
 
-                                <p>
-                                    Giá: @product.Price.ToString("N0") VNĐ
+                                    <div class="product-buttons">
+                                        @Html.ActionLink(
+                                                 "Xem chi tiết sản phẩm",
+                                                 "Detail",
+                                                 "Product",
+                                                 new { id = product.Id },
+                                                 new { @class = "btn btn-primary" }
+                                             )
 
-                                    @Html.ActionLink(
-                                        "Xem chi tiết sản phẩm",
-                                        "Detail",
-                                        "Product",
-                                        new { id = product.Id },
-                                        new { @class = "btn btn-primary" }
-                                    )
-                                </p>
+                                        <button type="button"
+                                                class="btn btn-danger add-to-cart"
+                                                data-id="@product.Id"
+                                                data-name="@product.Name"
+                                                data-price="@product.Price"
+                                                data-image="@Url.Content("~/Images/" + product.Image)">
+                                            Thêm vào giỏ hàng
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                }
-            </div>
+                    }
+                </div>
+            }
         </div>
     </div>
 </div>
+
+@section scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const cartKey = "beautyCart";
+
+            function getCart() {
+                try {
+                    const data = JSON.parse(localStorage.getItem(cartKey));
+                    return Array.isArray(data) ? data : [];
+                } catch (error) {
+                    return [];
+                }
+            }
+
+            document.querySelectorAll(".add-to-cart").forEach(function (button) {
+                button.addEventListener("click", function () {
+                    const id = Number(button.dataset.id);
+                    const name = button.dataset.name;
+                    const price = Number(button.dataset.price);
+                    const image = button.dataset.image;
+
+                    const cart = getCart();
+                    const existing = cart.find(function (item) {
+                        return Number(item.id) === id;
+                    });
+
+                    if (existing) {
+                        existing.quantity = (Number(existing.quantity) || 1) + 1;
+                    } else {
+                        cart.push({
+                            id: id,
+                            name: name,
+                            price: price,
+                            image: image,
+                            quantity: 1
+                        });
+                    }
+
+                    localStorage.setItem(cartKey, JSON.stringify(cart));
+                    alert("Đã thêm " + name + " vào giỏ hàng!");
+                });
+            });
+        });
+    </script>
+}
