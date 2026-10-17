@@ -1,0 +1,167 @@
+﻿@{
+    ViewBag.Title = "Giỏ hàng";
+}
+
+<section class="container py-5">
+    <h2 class="mb-4">Giỏ hàng của bạn</h2>
+
+    <div id="cartItems"></div>
+
+    <div class="border rounded-3 p-4 mt-4">
+        <div class="d-flex justify-content-between mb-3">
+            <strong>Tổng tiền:</strong>
+            <strong id="cartTotal">0 ₫</strong>
+        </div>
+
+        <button type="button" id="clearCart"
+                class="btn btn-outline-danger">
+            Xóa giỏ hàng
+        </button>
+
+        <a href="@Url.Action("Index", "Product")"
+           class="btn btn-outline-secondary">
+            Tiếp tục mua sắm
+        </a>
+
+        <button type="button" id="checkout"
+                class="btn btn-danger">
+            Thanh toán
+        </button>
+    </div>
+</section>
+
+@section scripts {
+    <script>document.addEventListener("DOMContentLoaded", function () {
+            const cartKey = "beautyCart";
+            const itemsContainer = document.getElementById("cartItems");
+            const totalElement = document.getElementById("cartTotal");
+
+            function getCart() {
+                try {
+                    return JSON.parse(localStorage.getItem(cartKey)) || [];
+                } catch {
+                    return [];
+                }
+            }
+
+            function saveCart(cart) {
+                localStorage.setItem(cartKey, JSON.stringify(cart));
+            }
+
+            function formatMoney(value) {
+                return Number(value).toLocaleString("vi-VN") + " ₫";
+            }
+
+            function renderCart() {
+                const cart = getCart();
+                itemsContainer.innerHTML = "";
+
+                if (cart.length === 0) {
+                    itemsContainer.innerHTML =
+                        '<p class="text-muted">Giỏ hàng của bạn đang trống.</p>';
+                    totalElement.textContent = "0 ₫";
+                    updateHeaderCount();
+                    return;
+                }
+
+                let total = 0;
+
+                cart.forEach(function (item, index) {
+                    const price = Number(item.price) || 0;
+                    const quantity = Math.max(1, Number(item.quantity) || 1);
+                    total += price * quantity;
+
+                    const row = document.createElement("div");
+                    row.className =
+                        "d-flex justify-content-between align-items-center gap-3 border-bottom py-3";
+
+                    const info = document.createElement("div");
+
+                    const name = document.createElement("strong");
+                    name.textContent = item.name || "Sản phẩm";
+
+                    const priceText = document.createElement("p");
+                    priceText.className = "mb-0 text-muted";
+                    priceText.textContent = formatMoney(price);
+
+                    info.appendChild(name);
+                    info.appendChild(priceText);
+
+                    const controls = document.createElement("div");
+                    controls.className = "d-flex align-items-center gap-2";
+
+                    const minus = document.createElement("button");
+                    minus.className = "btn btn-outline-secondary btn-sm";
+                    minus.textContent = "−";
+                    minus.type = "button";
+                    minus.addEventListener("click", function () {
+                        const current = getCart();
+                        current[index].quantity =
+                            Math.max(1, (Number(current[index].quantity) || 1) - 1);
+                        saveCart(current);
+                        renderCart();
+                    });
+
+                    const qty = document.createElement("span");
+                    qty.textContent = quantity;
+
+                    const plus = document.createElement("button");
+                    plus.className = "btn btn-outline-secondary btn-sm";
+                    plus.textContent = "+";
+                    plus.type = "button";
+                    plus.addEventListener("click", function () {
+                        const current = getCart();
+                        current[index].quantity =
+                            (Number(current[index].quantity) || 1) + 1;
+                        saveCart(current);
+                        renderCart();
+                    });
+
+                    const remove = document.createElement("button");
+                    remove.className = "btn btn-outline-danger btn-sm";
+                    remove.textContent = "Xóa";
+                    remove.type = "button";
+                    remove.addEventListener("click", function () {
+                        const current = getCart();
+                        current.splice(index, 1);
+                        saveCart(current);
+                        renderCart();
+                    });
+
+                    controls.append(minus, qty, plus, remove);
+                    row.append(info, controls);
+                    itemsContainer.appendChild(row);
+                });
+
+                totalElement.textContent = formatMoney(total);
+                updateHeaderCount();
+            }
+
+            function updateHeaderCount() {
+                const badge = document.getElementById("headerCartCount");
+                if (!badge) return;
+
+                const count = getCart().reduce(function (sum, item) {
+                    return sum + Math.max(0, Number(item.quantity) || 1);
+                }, 0);
+
+                badge.textContent = count;
+            }
+
+            document.getElementById("clearCart").addEventListener("click", function () {
+                saveCart([]);
+                renderCart();
+            });
+
+            document.getElementById("checkout").addEventListener("click", function () {
+                if (getCart().length === 0) {
+                    alert("Giỏ hàng đang trống!");
+                    return;
+                }
+
+                alert("Đây là giao diện demo. Chức năng thanh toán chưa được kết nối.");
+            });
+
+            renderCart();
+        });</script>
+}

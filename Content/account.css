@@ -1,0 +1,315 @@
+﻿/* Trang đăng nhập và đăng ký */
+.account-section {
+    min-height: 70vh;
+    padding: 56px 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at top left, #ffe1ec 0, transparent 36%), linear-gradient(135deg, #fffafa, #fff0f5);
+}
+
+.account-card {
+    width: 100%;
+    max-width: 460px;
+    padding: 36px;
+    border: 1px solid #f4dce5;
+    border-radius: 22px;
+    background: #ffffff;
+    box-shadow: 0 16px 45px rgba(116, 36, 69, 0.09);
+}
+
+.account-card-register {
+    max-width: 500px;
+}
+
+.account-brand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+    color: #29252a;
+    font-size: 22px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+    .account-brand:hover {
+        color: #29252a;
+    }
+
+.account-brand-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    color: #ffffff;
+    background: #e91e63;
+    box-shadow: 0 6px 15px rgba(233, 30, 99, 0.2);
+}
+
+.brand-highlight {
+    color: #e91e63;
+}
+
+.account-heading {
+    margin-bottom: 26px;
+    text-align: center;
+}
+
+    .account-heading h1 {
+        margin-bottom: 10px;
+        color: #29252a;
+        font-size: 27px;
+        font-weight: 800;
+    }
+
+    .account-heading p {
+        margin-bottom: 0;
+        color: #77717a;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+.account-field {
+    margin-bottom: 19px;
+}
+
+    .account-field > label {
+        display: block;
+        margin-bottom: 8px;
+        color: #383139;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .account-field .form-control {
+        min-height: 48px;
+        padding: 12px 14px;
+        border: 1px solid #e9dce2;
+        border-radius: 11px;
+        color: #29252a;
+        font-size: 14px;
+        background-color: #fff;
+        box-shadow: none;
+    }
+
+        .account-field .form-control::placeholder {
+            color: #aaa0a7;
+        }
+
+        .account-field .form-control:focus {
+            border-color: #e91e63;
+            box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
+        }
+
+.password-field {
+    position: relative;
+}
+
+    .password-field .form-control {
+        padding-right: 52px;
+    }
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 9px;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    color: #81747c;
+    background: transparent;
+    cursor: pointer;
+    z-index: 5;
+    pointer-events: auto;
+}
+
+    .password-toggle:hover {
+        color: #e91e63;
+        background: #fff0f5;
+    }
+
+    .password-toggle:focus-visible {
+        outline: 2px solid #e91e63;
+        outline-offset: 2px;
+    }
+
+    .password-toggle svg {
+        width: 19px;
+        height: 19px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+.account-options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin: 2px 0 22px;
+}
+
+.account-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: #625962;
+    font-size: 13px;
+    line-height: 1.6;
+    cursor: pointer;
+}
+
+    .account-checkbox input {
+        width: 16px;
+        height: 16px;
+        margin-top: 3px;
+        accent-color: #e91e63;
+        flex-shrink: 0;
+    }
+
+.account-muted {
+    color: #938892;
+    font-size: 12px;
+}
+
+.account-terms {
+    margin: 4px 0 20px;
+}
+
+.account-submit {
+    display: block;
+    width: 100%;
+    min-height: 49px;
+    padding: 12px 18px;
+    border: 0;
+    border-radius: 12px;
+    color: #ffffff;
+    background: #e91e63;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+    .account-submit:hover {
+        color: #ffffff;
+        background: #c2185b;
+        transform: translateY(-1px);
+    }
+
+    .account-submit:focus-visible {
+        outline: 3px solid rgba(233, 30, 99, 0.25);
+        outline-offset: 3px;
+    }
+
+.account-switch {
+    margin: 24px 0 14px;
+    color: #77717a;
+    font-size: 14px;
+    text-align: center;
+}
+
+    .account-switch a {
+        color: #e91e63;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+        .account-switch a:hover {
+            text-decoration: underline;
+        }
+
+.account-back {
+    display: block;
+    color: #77717a;
+    font-size: 13px;
+    text-align: center;
+    text-decoration: none;
+}
+
+    .account-back:hover {
+        color: #e91e63;
+    }
+
+.account-message {
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    border: 1px solid #f3c6d6;
+    border-radius: 10px;
+    color: #a3164b;
+    background: #fff0f5;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+    .account-message.success {
+        border-color: #b8e2c5;
+        color: #176b37;
+        background: #effaf2;
+    }
+
+.password-strength {
+    margin-top: 9px;
+}
+
+.password-strength-track {
+    height: 5px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #f0e8ed;
+}
+
+    .password-strength-track span {
+        display: block;
+        width: 0;
+        height: 100%;
+        border-radius: inherit;
+        background: #e91e63;
+        transition: width 0.2s ease, background 0.2s ease;
+    }
+
+.password-strength small,
+.field-error {
+    display: block;
+    margin-top: 6px;
+    color: #938892;
+    font-size: 12px;
+}
+
+.field-error {
+    color: #c2185b;
+}
+
+@media (max-width: 575px) {
+    .account-section {
+        min-height: auto;
+        padding: 32px 12px;
+    }
+
+    .account-card,
+    .account-card-register {
+        padding: 26px 20px;
+        border-radius: 17px;
+    }
+
+    .account-heading h1 {
+        font-size: 23px;
+    }
+
+    .account-brand {
+        font-size: 20px;
+    }
+}

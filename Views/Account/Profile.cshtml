@@ -1,0 +1,118 @@
+﻿@{
+    ViewBag.Title = "Hồ sơ cá nhân";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="account-section profile-section">
+    <div class="container">
+        <div class="profile-card">
+
+            <div class="profile-heading">
+                <div class="profile-avatar">BC</div>
+
+                <div>
+                    <h1>Hồ sơ cá nhân</h1>
+                    <p class="account-subtitle">
+                        Quản lý thông tin tài khoản BeautyCosmetic
+                    </p>
+                </div>
+            </div>
+
+            <div id="profileMessage"
+                 class="alert d-none"
+                 role="status"></div>
+
+            <form id="profileForm">
+                <div class="mb-3">
+                    <label for="profileName" class="form-label">
+                        Họ và tên
+                    </label>
+                    <input type="text"
+                           class="form-control"
+                           id="profileName"
+                           value=""
+                           placeholder="Nhập họ và tên"
+                           autocomplete="name"
+                           required />
+                </div>
+
+                <div class="mb-3">
+                    <label for="profileEmail" class="form-label">
+                        Email
+                    </label>
+                    <input type="email"
+                           class="form-control"
+                           id="profileEmail"
+                           value=""
+                           placeholder="Nhập địa chỉ email"
+                           autocomplete="email"
+                           required />
+                </div>
+
+                <div class="mb-3">
+                    <label for="profilePhone" class="form-label">
+                        Số điện thoại
+                    </label>
+                    <input type="tel"
+                           class="form-control"
+                           id="profilePhone"
+                           placeholder="Nhập số điện thoại"
+                           autocomplete="tel"
+                           pattern="0[0-9]{9}" />
+                    <small class="text-muted">
+                        Số điện thoại gồm 10 chữ số, bắt đầu bằng số 0.
+                    </small>
+                </div>
+
+                <div class="mb-4">
+                    <label for="profileSkinType" class="form-label">
+                        Loại da
+                    </label>
+                    <select class="form-select" id="profileSkinType">
+                        <option value="">Chọn loại da</option>
+                        <option value="Da dầu">Da dầu</option>
+                        <option value="Da khô">Da khô</option>
+                        <option value="Da hỗn hợp">Da hỗn hợp</option>
+                        <option value="Da nhạy cảm">Da nhạy cảm</option>
+                        <option value="Chưa xác định">Chưa xác định</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-pink w-100">
+                    Lưu thông tin
+                </button>
+            </form>
+
+            <div class="profile-links">
+                <a href="@Url.Action("Index", "Cart")">
+                    Xem giỏ hàng
+                </a>
+
+                <span>|</span>
+
+                <a href="@Url.Action("Index", "Home")">
+                    Quay lại trang chủ
+                </a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+@section scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("profileForm");
+            const message = document.getElementById("profileMessage");
+
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                message.textContent =
+                    "Thông tin đã được kiểm tra. Chức năng lưu dữ liệu thật chưa được kết nối.";
+
+                message.className = "alert alert-info";
+            });
+        });
+    </script>
+}
