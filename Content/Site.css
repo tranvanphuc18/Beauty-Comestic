@@ -18,8 +18,8 @@ select,
 textarea {
     max-width: 280px;
 }
- 
-﻿:root {
+
+:root {
     --primary: #E91E63;
     --primary-dark: #C2185B;
     --primary-light: #FCE7EF;
@@ -122,83 +122,104 @@ img {
     font-size: 30px;
 }
 
-.search-box {
+/* ===== Thanh tìm kiếm ===== */
+.site-header .search-box {
+    position: relative;
     display: flex;
-    align-items: center; /* Căn giữa các phần tử theo chiều dọc */
+    align-items: center;
+    flex: 1 1 auto;
     width: 100%;
     max-width: 570px;
-    height: 46px;
+    height: 48px;
     margin: 0 auto;
-    overflow: hidden;
-    border: 1px solid #EADCE2;
-    border-radius: 9px;
+    padding: 4px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
     background: #FFFCFD;
-    box-sizing: border-box;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    box-shadow: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
 }
 
-    .search-box:focus-within {
-        border-color: var(--primary, #E63946);
-        box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.09);
+    .site-header .search-box:hover {
+        border-color: #E8C9D5;
     }
 
-    .search-box input {
-        flex: 1; 
-        width: 100%;
-        max-width: none; 
-        height: 100%; 
+    .site-header .search-box:focus-within {
+        border-color: var(--primary);
+        background: var(--white);
+        box-shadow: 0 0 0 4px rgba(233, 30, 99, 0.10);
+    }
+
+    .site-header .search-box input[type="search"] {
+        flex: 1 1 auto;
+        width: auto;
         min-width: 0;
-        padding: 0 15px;
+        max-width: none;
+        height: 100%;
+        margin: 0;
+        padding: 0 8px 0 14px;
         border: 0;
+        border-radius: 0;
         outline: 0;
+        box-shadow: none;
         background: transparent;
-        color: var(--text, #333333);
+        color: var(--text);
         font-size: 14.5px;
-        box-sizing: border-box;
+        -webkit-appearance: none;
+        appearance: none;
     }
 
-        .search-box input::placeholder {
+        .site-header .search-box input[type="search"]::placeholder {
             color: #A49AA1;
+            opacity: 1;
         }
 
-       
-        .search-box input::-webkit-search-cancel-button,
-        .search-box input::-webkit-search-decoration {
+        .site-header .search-box input[type="search"]::-webkit-search-cancel-button,
+        .site-header .search-box input[type="search"]::-webkit-search-decoration {
             -webkit-appearance: none;
             appearance: none;
         }
 
-    .search-box button {
+    .site-header .search-box button[type="submit"] {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 50px;
+        flex: 0 0 auto;
+        width: 40px;
         height: 100%;
-        flex-shrink: 0;
-        margin: 0;
+        margin: 0 0 0 auto;
         padding: 0;
-        border: none;
-        border-left: 1px solid #EADCE2;
-        border-radius: 0;
-        background: #FFFCFD;
-        color: #333333;
+        border: 0;
+        border-radius: 9px;
+        background: var(--primary);
+        color: var(--white);
         cursor: pointer;
-        transition: background-color 0.2s;
+        transition: background-color 0.2s, transform 0.1s;
     }
 
-        .search-box button:hover {
-            background: #F8F1F4;
+        .site-header .search-box button[type="submit"]:hover {
+            background: var(--primary-dark);
         }
 
-        .search-box button svg {
-            width: 21px;
-            height: 21px;
+        .site-header .search-box button[type="submit"]:active {
+            transform: scale(0.95);
+        }
+
+        .site-header .search-box button[type="submit"]:focus-visible {
+            outline: 2px solid var(--primary-dark);
+            outline-offset: 2px;
+        }
+
+        .site-header .search-box button[type="submit"] svg {
+            width: 20px;
+            height: 20px;
             fill: none;
             stroke: currentColor;
-            stroke-width: 2;
+            stroke-width: 2.2;
             stroke-linecap: round;
             stroke-linejoin: round;
         }
+
 .header-actions {
     display: flex;
     align-items: center;
@@ -476,9 +497,9 @@ img {
         font-size: 23px;
     }
 
-    .search-box {
+    .site-header .search-box {
         order: 3;
-        flex-basis: 100%;
+        flex: 1 1 100%;
         max-width: none;
     }
 
@@ -586,82 +607,175 @@ img {
     padding-bottom: 40px;
 }
 
+/* ===== Thẻ sản phẩm ===== */
 .product-card {
-    height: 100%;
+    /* Đổi màu nền khu vực ảnh sản phẩm tại đây */
+    --product-media-bg: linear-gradient(180deg, #FFF7FA 0%, #FDEEF4 100%);
+    position: relative;
     display: flex;
     flex-direction: column;
+    height: 100%;
     overflow: hidden;
-    border: 1px solid #e5dce0;
-    border-radius: 12px;
-    background: #fff;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--white);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
     .product-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        border-color: #EBCBD8;
+        box-shadow: 0 14px 30px rgba(90, 30, 55, 0.10);
+    }
+
+    .product-card .product-media {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 230px;
+        padding: 18px;
+        overflow: hidden;
+        background: var(--product-media-bg);
     }
 
     .product-card .product-image {
         width: 100%;
-        height: 220px;
-        padding: 16px;
+        height: 100%;
         object-fit: contain;
-        background: #fff;
+        mix-blend-mode: multiply; /* nền trắng của ảnh hoà vào nền hồng */
+        transition: transform 0.4s ease;
+    }
+
+    .product-card:hover .product-image {
+        transform: scale(1.06);
     }
 
     .product-card .card-body {
         display: flex;
         flex: 1;
         flex-direction: column;
-        padding: 16px;
+        padding: 16px 16px 18px;
     }
 
-        .product-card .card-body h4 {
-            min-height: 56px;
-            margin-bottom: 10px;
-            font-size: 19px;
-            line-height: 1.4;
+.product-card-brand {
+    align-self: flex-start;
+    margin-bottom: 8px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    line-height: 1.6;
+    text-transform: uppercase;
+}
+
+.product-card .product-name {
+    display: -webkit-box;
+    min-height: calc(1.45em * 2); /* luôn chừa đủ 2 dòng để các thẻ thẳng hàng */
+    margin: 0 0 10px;
+    overflow: hidden;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.45;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+    .product-card .product-name a {
+        color: var(--text);
+        transition: color 0.2s;
+    }
+
+        .product-card .product-name a:hover {
+            color: var(--primary);
         }
 
-        .product-card .card-body p {
-            margin-bottom: 12px;
-            font-size: 14px;
-            line-height: 1.5;
-        }
+.product-card .product-price {
+    margin: auto 0 14px;
+    color: var(--primary);
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+    line-height: 1.3;
+}
 
-    .product-card .product-price {
-        margin-top: auto;
+    .product-card .product-price small {
+        margin-left: 2px;
+        color: var(--muted);
+        font-size: 12px;
         font-weight: 600;
+        letter-spacing: 0;
     }
 
 .product-buttons {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
     .product-buttons .btn {
         display: flex;
-        width: 100%;
-        min-height: 46px;
+        flex: 1 1 auto;
         align-items: center;
         justify-content: center;
-        padding: 10px;
-        border-radius: 8px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.3;
         text-align: center;
-        white-space: normal;
+        white-space: nowrap; /* không để chữ bị xuống dòng; nếu thẻ quá hẹp thì cả nút tự xuống hàng */
+        transition: background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.1s;
+    }
+
+        .product-buttons .btn:active {
+            transform: scale(0.97);
+        }
+
+    /* Nút chính: Thêm vào giỏ hàng */
+    .product-buttons .btn-danger {
+        flex-grow: 1.4;
+        border: 1px solid var(--primary);
+        background: var(--primary);
+        color: var(--white);
+    }
+
+        .product-buttons .btn-danger:hover,
+        .product-buttons .btn-danger:focus-visible {
+            border-color: var(--primary-dark);
+            background: var(--primary-dark);
+            color: var(--white);
+        }
+
+    /* Nút phụ: Xem chi tiết */
+    .product-buttons .btn-primary {
+        border: 1px solid #EBCBD8;
+        background: var(--white);
+        color: var(--primary-dark);
+    }
+
+        .product-buttons .btn-primary:hover,
+        .product-buttons .btn-primary:focus-visible {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+    .product-buttons .btn:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+        box-shadow: none;
     }
 
 @media (max-width: 576px) {
-    .product-card .product-image {
-        height: 190px;
+    .product-card .product-media {
+        height: 200px;
     }
 
-    .product-card .card-body h4 {
-        min-height: 0;
-        font-size: 18px;
+    .product-card .product-name {
+        font-size: 15px;
     }
 }
-

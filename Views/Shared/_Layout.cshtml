@@ -42,22 +42,21 @@
                     <span class="brand-dot">.</span>
                 </a>
 
-               
-                    <form class="search-box" action="@Url.Action("Index", "Product")" method="get" role="search">
-                        <input type="search"
-                               name="keyword"
-                               value="@Request.QueryString["keyword"]"  
-                        placeholder="Tìm mỹ phẩm, thương hiệu..."
-                        aria-label="Tìm kiếm sản phẩm" />
-                        <button type="submit" aria-label="Tìm kiếm">
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <circle cx="10.8" cy="10.8" r="6.8"></circle>
-                                <path d="M16 16 21 21"></path>
-                            </svg>
-                        </button>
-                    </form>
-                </form>
 
+                <form class="search-box" action="@Url.Action("Index", "Product")" method="get" role="search">
+                    <input type="search"
+                           name="keyword"
+                           value="@Request.QueryString["keyword"]"
+                           placeholder="Tìm mỹ phẩm, thương hiệu..."
+                           aria-label="Tìm kiếm sản phẩm"
+                           autocomplete="off" />
+                    <button type="submit" aria-label="Tìm kiếm">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="10.8" cy="10.8" r="6.8"></circle>
+                            <path d="M16 16 21 21"></path>
+                        </svg>
+                    </button>
+                </form>
 
                 <div class="header-actions">
                     <a href="@Url.Action("Login", "Account")"

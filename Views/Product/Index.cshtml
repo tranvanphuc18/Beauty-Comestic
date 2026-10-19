@@ -24,27 +24,35 @@
                     {
                         <div class="col-md-6 col-xl-4">
                             <div class="card product-card">
-                                <img src="@Url.Content("~/Images/" + product.Image)"
-                                     class="product-image"
-                                     alt="@product.Name" />
+                                <a class="product-media"
+                                   href="@Url.Action("Detail", "Product", new { id = product.Id })"
+                                   tabindex="-1"
+                                   aria-hidden="true">
+                                    <img src="@Url.Content("~/Images/" + product.Image)"
+                                         class="product-image"
+                                         alt="@product.Name"
+                                         loading="lazy" />
+                                </a>
 
                                 <div class="card-body">
-                                    <h4>@product.Name</h4>
+                                    <span class="product-card-brand">@product.Brand</span>
 
-                                    <p>Thương hiệu: @product.Brand</p>
+                                    <h4 class="product-name">
+                                        <a href="@Url.Action("Detail", "Product", new { id = product.Id })">@product.Name</a>
+                                    </h4>
 
                                     <p class="product-price">
-                                        Giá: @product.Price.ToString("N0") VNĐ
+                                        @product.Price.ToString("N0") <small>VNĐ</small>
                                     </p>
 
                                     <div class="product-buttons">
                                         @Html.ActionLink(
-                                                 "Xem chi tiết sản phẩm",
-                                                 "Detail",
-                                                 "Product",
-                                                 new { id = product.Id },
-                                                 new { @class = "btn btn-primary" }
-                                             )
+                                                      "Xem chi tiết",
+                                                      "Detail",
+                                                      "Product",
+                                                      new { id = product.Id },
+                                                      new { @class = "btn btn-primary" }
+                                                  )
 
                                         <button type="button"
                                                 class="btn btn-danger add-to-cart"
