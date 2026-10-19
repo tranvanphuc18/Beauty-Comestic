@@ -73,16 +73,27 @@ namespace nv3.Controllers
         };
 
         public ActionResult Index(
-            string category,
-            string[] skinTypes,
-            string[] brands)
+      string keyword,     // <--- 1. MỚI THÊM: Đón từ khóa người dùng gõ
+      string category,
+      string[] skinTypes,
+      string[] brands)
         {
             skinTypes = skinTypes ?? new string[0];
             brands = brands ?? new string[0];
-
             IEnumerable<Product> result = products;
-
-            // Lọc theo danh mục
+            // ================= 2. MỚI THÊM: XỬ LÝ TÌM KIẾM =================
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                string kw = keyword.Trim().ToLower();
+                // Tìm theo cả Tên sản phẩm, Tên thương hiệu và Mô tả
+                result = result.Where(p =>
+                    p.Name.ToLower().Contains(kw) ||
+                    p.Brand.ToLower().Contains(kw) ||
+                    (p.Description != null && p.Description.ToLower().Contains(kw))
+                );
+            }
+            // ==============================================================
+            // Lọc theo danh mục (giữ nguyên của bạn)
             if (!string.IsNullOrEmpty(category))
             {
                 switch (category.ToLower())
@@ -92,23 +103,19 @@ namespace nv3.Controllers
                             p.Id == 1 || p.Id == 2 ||
                             p.Id == 3 || p.Id == 4);
                         break;
-
                     case "trang-diem":
                         result = result.Where(p => p.Id == 6);
                         break;
-
                     case "chong-nang":
                         result = result.Where(p => p.Id == 5);
                         break;
-
                     case "duong-am":
                         result = result.Where(p =>
                             p.Id == 2 || p.Id == 4);
                         break;
                 }
             }
-
-            // Lọc theo loại da
+            // Lọc theo loại da (giữ nguyên của bạn)
             if (skinTypes.Length > 0)
             {
                 result = result.Where(p =>
@@ -116,19 +123,17 @@ namespace nv3.Controllers
                     .Intersect(skinTypes)
                     .Any());
             }
-
-            // Lọc theo thương hiệu
+            // Lọc theo thương hiệu (giữ nguyên của bạn)
             if (brands.Length > 0)
             {
                 result = result.Where(p =>
                     brands.Contains(
                         p.Brand.ToLower().Replace(" ", "-")));
             }
-
+            ViewBag.Keyword = keyword; // Lưu lại từ khóa
             ViewBag.SelectedSkinTypes = skinTypes;
             ViewBag.SelectedBrands = brands;
             ViewBag.SelectedCategory = category;
-
             return View(result.ToList());
         }
 
@@ -139,6 +144,52 @@ namespace nv3.Controllers
             if (product == null)
             {
                 return HttpNotFound();
+            }
+
+            // === THÊM ĐÁNH GIÁ RIÊNG CHO TỪNG SẢN PHẨM TẠI ĐÂY ===
+            switch (id)
+            {
+                case 1: // CeraVe
+                    ViewBag.Rating = "5.0";
+                    ViewBag.ReviewCount = "128 đánh giá";
+                    ViewBag.SoldCount = "Đã bán 1.2k";
+                    break;
+
+                case 2: // Klairs
+                    ViewBag.Rating = "4.9";
+                    ViewBag.ReviewCount = "89 đánh giá";
+                    ViewBag.SoldCount = "Đã bán 850";
+                    break;
+
+                case 3: // Melano CC
+                    ViewBag.Rating = "4.7";
+                    ViewBag.ReviewCount = "215 đánh giá";
+                    ViewBag.SoldCount = "Đã bán 2.4k";
+                    break;
+
+                case 4: // La Roche-Posay
+                    ViewBag.Rating = "5.0";
+                    ViewBag.ReviewCount = "340 đánh giá";
+                    ViewBag.SoldCount = "Đã bán 3.1k";
+                    break;
+
+                case 5: // Anessa
+                    ViewBag.Rating = "4.9";
+                    ViewBag.ReviewCount = "512 đánh giá";
+                    ViewBag.SoldCount = "Đã bán 5.0k";
+                    break;
+
+                case 6: // YSL
+                    ViewBag.Rating = "5.0";
+                    ViewBag.ReviewCount = "64 đánh giá";
+                    ViewBag.SoldCount = "Đã bán 320";
+                    break;
+
+                default:
+                    ViewBag.Rating = "5.0";
+                    ViewBag.ReviewCount = "100 đánh giá";
+                    ViewBag.SoldCount = "Đã bán 500";
+                    break;
             }
 
             return View(product);

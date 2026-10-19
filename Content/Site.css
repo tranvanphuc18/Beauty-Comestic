@@ -124,7 +124,8 @@ img {
 
 .search-box {
     display: flex;
-    flex: 1;
+    align-items: center; /* Căn giữa các phần tử theo chiều dọc */
+    width: 100%;
     max-width: 570px;
     height: 46px;
     margin: 0 auto;
@@ -132,42 +133,61 @@ img {
     border: 1px solid #EADCE2;
     border-radius: 9px;
     background: #FFFCFD;
+    box-sizing: border-box;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
     .search-box:focus-within {
-        border-color: var(--primary);
+        border-color: var(--primary, #E63946);
         box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.09);
     }
 
     .search-box input {
+        flex: 1; 
         width: 100%;
+        max-width: none; 
+        height: 100%; 
         min-width: 0;
         padding: 0 15px;
         border: 0;
         outline: 0;
         background: transparent;
-        color: var(--text);
+        color: var(--text, #333333);
+        font-size: 14.5px;
+        box-sizing: border-box;
     }
 
         .search-box input::placeholder {
             color: #A49AA1;
         }
 
+       
+        .search-box input::-webkit-search-cancel-button,
+        .search-box input::-webkit-search-decoration {
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
     .search-box button {
-        display: grid;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         width: 50px;
+        height: 100%;
         flex-shrink: 0;
-        place-items: center;
-        border: 0;
-        background: var(--primary);
-        color: var(--white);
+        margin: 0;
+        padding: 0;
+        border: none;
+        border-left: 1px solid #EADCE2;
+        border-radius: 0;
+        background: #FFFCFD;
+        color: #333333;
         cursor: pointer;
-        transition: background 0.2s;
+        transition: background-color 0.2s;
     }
 
         .search-box button:hover {
-            background: var(--primary-dark);
+            background: #F8F1F4;
         }
 
         .search-box button svg {
@@ -175,10 +195,10 @@ img {
             height: 21px;
             fill: none;
             stroke: currentColor;
-            stroke-width: 1.8;
+            stroke-width: 2;
             stroke-linecap: round;
+            stroke-linejoin: round;
         }
-
 .header-actions {
     display: flex;
     align-items: center;
@@ -644,3 +664,4 @@ img {
         font-size: 18px;
     }
 }
+

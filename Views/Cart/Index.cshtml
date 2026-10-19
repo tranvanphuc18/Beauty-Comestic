@@ -1,7 +1,6 @@
 ﻿@{
     ViewBag.Title = "Giỏ hàng";
 }
-
 <section class="container py-5">
     <h2 class="mb-4">Giỏ hàng của bạn</h2>
 
@@ -31,7 +30,8 @@
 </section>
 
 @section scripts {
-    <script>document.addEventListener("DOMContentLoaded", function () {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
             const cartKey = "beautyCart";
             const itemsContainer = document.getElementById("cartItems");
             const totalElement = document.getElementById("cartTotal");
@@ -50,6 +50,21 @@
 
             function formatMoney(value) {
                 return Number(value).toLocaleString("vi-VN") + " ₫";
+            }
+
+            // HÀM TỰ ĐỘNG LẤY ĐÚNG ẢNH CỦA TỪNG SẢN PHẨM
+            function getProductImage(item) {
+                if (item.image && typeof item.image === "string" && item.image.trim() !== "") {
+                    return item.image.startsWith("/") ? item.image : "/Images/" + item.image;
+                }
+                const name = (item.name || "").toLowerCase();
+                if (name.includes("cerave") || name.includes("sữa rửa mặt")) return "/Images/ceraVe.jpg";
+                if (name.includes("klairs") || name.includes("toner")) return "/Images/klairs.jpg";
+                if (name.includes("melano") || name.includes("serum")) return "/Images/melano.jpg";
+                if (name.includes("roche") || name.includes("dưỡng") || name.includes("phục hồi")) return "/Images/larocheposay.jpg";
+                if (name.includes("anessa") || name.includes("chống nắng")) return "/Images/anessa.jpg";
+                if (name.includes("ysl") || name.includes("son")) return "/Images/ysl.jpg";
+                return "/Images/ceraVe.jpg";
             }
 
             function renderCart() {
@@ -75,10 +90,30 @@
                     row.className =
                         "d-flex justify-content-between align-items-center gap-3 border-bottom py-3";
 
+                    // ================= 1. KHỐI BÊN TRÁI: ẢNH + TÊN + GIÁ =================
+                    const leftSide = document.createElement("div");
+                    leftSide.className = "d-flex align-items-center gap-3";
+
+                    // Tạo ảnh sản phẩm
+                    const img = document.createElement("img");
+                    img.src = getProductImage(item);
+                    img.alt = item.name || "Sản phẩm";
+                    img.style.width = "70px";
+                    img.style.height = "70px";
+                    img.style.objectFit = "contain";
+                    img.style.border = "1px solid #EADCE2";
+                    img.style.borderRadius = "8px";
+                    img.style.padding = "4px";
+                    img.style.backgroundColor = "#ffffff";
+                    img.style.flexShrink = "0";
+
+                    // Thông tin chữ
                     const info = document.createElement("div");
 
                     const name = document.createElement("strong");
                     name.textContent = item.name || "Sản phẩm";
+                    name.style.display = "block";
+                    name.style.marginBottom = "4px";
 
                     const priceText = document.createElement("p");
                     priceText.className = "mb-0 text-muted";
@@ -87,6 +122,11 @@
                     info.appendChild(name);
                     info.appendChild(priceText);
 
+                    // Gắn ảnh và thông tin vào khối trái
+                    leftSide.appendChild(img);
+                    leftSide.appendChild(info);
+
+                    // ================= 2. KHỐI BÊN PHẢI: NÚT BẤM =================
                     const controls = document.createElement("div");
                     controls.className = "d-flex align-items-center gap-2";
 
@@ -103,6 +143,7 @@
                     });
 
                     const qty = document.createElement("span");
+                    qty.className = "px-2";
                     qty.textContent = quantity;
 
                     const plus = document.createElement("button");
@@ -129,7 +170,9 @@
                     });
 
                     controls.append(minus, qty, plus, remove);
-                    row.append(info, controls);
+
+                    // Gắn khối trái (có ảnh) và khối phải vào hàng
+                    row.append(leftSide, controls);
                     itemsContainer.appendChild(row);
                 });
 
@@ -163,5 +206,6 @@
             });
 
             renderCart();
-        });</script>
+        });
+    </script>
 }

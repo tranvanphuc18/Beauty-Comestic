@@ -28,7 +28,10 @@
                 <p>
                     <strong>Mô tả:</strong> @Model.Description
                 </p>
-
+                <p style="color: #FFB800; font-size: 14px; margin: 8px 0;">
+                    ★★★★★ <strong>@ViewBag.Rating</strong>
+                    <span style="color: #666; margin-left: 8px;">(@ViewBag.ReviewCount | @ViewBag.SoldCount)</span>
+                </p>
                 @Html.ActionLink(
                     "Quay lại danh sách",
                     "Index",
@@ -37,5 +40,6 @@
                     new { @class = "btn btn-default" }
                 )
             </div>
+
         </div>
 </div>
