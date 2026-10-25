@@ -1,198 +1,93 @@
-﻿
-using MyPham_Models;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
+using System.Net;
 using System.Web.Mvc;
+using nv3.Models;
 
 namespace nv3.Controllers
 {
     public class ProductController : Controller
     {
-        private static List<Product> products = new List<Product>
-        {
-            new Product
-            {
-                Id = 1,
-                Name = "Sữa rửa mặt dịu nhẹ",
-                Brand = "CeraVe",
-                Price = 250000,
-                Image = "ceraVe.jpg",
-                Description = "Sữa rửa mặt dịu nhẹ giúp làm sạch da.",
-                SkinTypes = new[] { "oily", "combination" }
-            },
-            new Product
-            {
-                Id = 2,
-                Name = "Toner cấp ẩm",
-                Brand = "Klairs",
-                Price = 320000,
-                Image = "klairs.jpg",
-                Description = "Toner giúp cấp ẩm và làm dịu da.",
-                SkinTypes = new[] { "dry", "combination", "sensitive" }
-            },
-            new Product
-            {
-                Id = 3,
-                Name = "Serum Vitamin C",
-                Brand = "Melano CC",
-                Price = 280000,
-                Image = "melano.jpg",
-                Description = "Serum chăm sóc da với Vitamin C.",
-                SkinTypes = new[] { "oily", "combination" }
-            },
-            new Product
-            {
-                Id = 4,
-                Name = "Kem dưỡng ẩm phục hồi",
-                Brand = "La Roche-Posay",
-                Price = 450000,
-                Image = "larocheposay.jpg",
-                Description = "Kem dưỡng ẩm hỗ trợ phục hồi da.",
-                SkinTypes = new[] { "dry", "sensitive" }
-            },
-            new Product
-            {
-                Id = 5,
-                Name = "Kem chống nắng",
-                Brand = "Anessa",
-                Price = 400000,
-                Image = "anessa.jpg",
-                Description = "Kem chống nắng dùng hằng ngày.",
-                SkinTypes = new[] { "oily", "dry", "combination", "sensitive" }
-            },
-            new Product
-            {
-                Id = 6,
-                Name = "Son cao cấp",
-                Brand = "YSL",
-                Price = 950000,
-                Image = "ysl.jpg",
-                Description = "Son môi cao cấp với thiết kế sang trọng.",
-                SkinTypes = new string[0]
-            }
-        };
+        private const int PageSize = 9;
+        private BeautyCosmeticEntities db = new BeautyCosmeticEntities();
 
-        public ActionResult Index(
-      string keyword,     // <--- 1. MỚI THÊM: Đón từ khóa người dùng gõ
-      string category,
-      string[] skinTypes,
-      string[] brands)
+        public ActionResult Index(string keyword, string category, string[] skinTypes, string[] brands, int page = 1)
         {
             skinTypes = skinTypes ?? new string[0];
             brands = brands ?? new string[0];
-            IEnumerable<Product> result = products;
-            // ================= 2. MỚI THÊM: XỬ LÝ TÌM KIẾM =================
-            if (!string.IsNullOrEmpty(keyword))
+            if (page < 1) page = 1;
+
+            // 1) Chỉ lấy sản phẩm còn hàng
+            var query = db.Products.Where(p => p.Quantity > 0);
+
+            // 2) Tìm kiếm theo tên, thương hiệu, mô tả
+            if (!string.IsNullOrWhiteSpace(keyword))
             {
-                string kw = keyword.Trim().ToLower();
-                // Tìm theo cả Tên sản phẩm, Tên thương hiệu và Mô tả
-                result = result.Where(p =>
-                    p.Name.ToLower().Contains(kw) ||
-                    p.Brand.ToLower().Contains(kw) ||
-                    (p.Description != null && p.Description.ToLower().Contains(kw))
-                );
+                string kw = keyword.Trim();
+                query = query.Where(p => p.ProductName.Contains(kw)
+                                      || p.Brand.Contains(kw)
+                                      || p.Description.Contains(kw));
             }
-            // ==============================================================
-            // Lọc theo danh mục (giữ nguyên của bạn)
+
+            // 3) Lọc theo danh mục (slug)
             if (!string.IsNullOrEmpty(category))
             {
-                switch (category.ToLower())
-                {
-                    case "cham-soc-da":
-                        result = result.Where(p =>
-                            p.Id == 1 || p.Id == 2 ||
-                            p.Id == 3 || p.Id == 4);
-                        break;
-                    case "trang-diem":
-                        result = result.Where(p => p.Id == 6);
-                        break;
-                    case "chong-nang":
-                        result = result.Where(p => p.Id == 5);
-                        break;
-                    case "duong-am":
-                        result = result.Where(p =>
-                            p.Id == 2 || p.Id == 4);
-                        break;
-                }
+                query = query.Where(p => p.Category.Slug == category);
             }
-            // Lọc theo loại da (giữ nguyên của bạn)
+
+            var list = query.OrderBy(p => p.ProductID).ToList();
+
+            // 4) Lọc loại da (SkinTypes lưu dạng "oily,dry") - lọc trong bộ nhớ cho đơn giản
             if (skinTypes.Length > 0)
             {
-                result = result.Where(p =>
-                    (p.SkinTypes ?? new string[0])
-                    .Intersect(skinTypes)
-                    .Any());
+                list = list.Where(p => !string.IsNullOrEmpty(p.SkinTypes)
+                    && p.SkinTypes.Split(',').Select(s => s.Trim()).Intersect(skinTypes).Any()).ToList();
             }
-            // Lọc theo thương hiệu (giữ nguyên của bạn)
+
+            // 5) Lọc thương hiệu (value trong filter = tên viết thường, thay dấu cách bằng "-")
             if (brands.Length > 0)
             {
-                result = result.Where(p =>
-                    brands.Contains(
-                        p.Brand.ToLower().Replace(" ", "-")));
+                list = list.Where(p => brands.Contains(p.Brand.ToLower().Replace(" ", "-"))).ToList();
             }
-            ViewBag.Keyword = keyword; // Lưu lại từ khóa
+
+            // 6) Phân trang
+            int totalItems = list.Count;
+            int totalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
+            if (totalPages < 1) totalPages = 1;
+            if (page > totalPages) page = totalPages;
+
+            var items = list.Skip((page - 1) * PageSize).Take(PageSize).ToList();
+
+            ViewBag.Keyword = keyword;
             ViewBag.SelectedSkinTypes = skinTypes;
             ViewBag.SelectedBrands = brands;
             ViewBag.SelectedCategory = category;
-            return View(result.ToList());
+            ViewBag.Page = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalItems = totalItems;
+
+            return View(items);
         }
 
-        public ActionResult Detail(int id)
+        public ActionResult Detail(int? id)
         {
-            var product = products.FirstOrDefault(p => p.Id == id);
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
 
+            var product = db.Products.Find(id);
             if (product == null)
             {
                 return HttpNotFound();
             }
-
-            // === THÊM ĐÁNH GIÁ RIÊNG CHO TỪNG SẢN PHẨM TẠI ĐÂY ===
-            switch (id)
-            {
-                case 1: // CeraVe
-                    ViewBag.Rating = "5.0";
-                    ViewBag.ReviewCount = "128 đánh giá";
-                    ViewBag.SoldCount = "Đã bán 1.2k";
-                    break;
-
-                case 2: // Klairs
-                    ViewBag.Rating = "4.9";
-                    ViewBag.ReviewCount = "89 đánh giá";
-                    ViewBag.SoldCount = "Đã bán 850";
-                    break;
-
-                case 3: // Melano CC
-                    ViewBag.Rating = "4.7";
-                    ViewBag.ReviewCount = "215 đánh giá";
-                    ViewBag.SoldCount = "Đã bán 2.4k";
-                    break;
-
-                case 4: // La Roche-Posay
-                    ViewBag.Rating = "5.0";
-                    ViewBag.ReviewCount = "340 đánh giá";
-                    ViewBag.SoldCount = "Đã bán 3.1k";
-                    break;
-
-                case 5: // Anessa
-                    ViewBag.Rating = "4.9";
-                    ViewBag.ReviewCount = "512 đánh giá";
-                    ViewBag.SoldCount = "Đã bán 5.0k";
-                    break;
-
-                case 6: // YSL
-                    ViewBag.Rating = "5.0";
-                    ViewBag.ReviewCount = "64 đánh giá";
-                    ViewBag.SoldCount = "Đã bán 320";
-                    break;
-
-                default:
-                    ViewBag.Rating = "5.0";
-                    ViewBag.ReviewCount = "100 đánh giá";
-                    ViewBag.SoldCount = "Đã bán 500";
-                    break;
-            }
-
             return View(product);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) db.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

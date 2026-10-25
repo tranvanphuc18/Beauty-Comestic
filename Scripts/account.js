@@ -3,7 +3,6 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         setupPasswordToggles();
-        setupLoginForm();
         setupRegisterForm();
     });
 
@@ -50,53 +49,16 @@
         });
     }
 
-    // Hiển thị thông báo
-    function showMessage(element, message, isSuccess) {
-        if (!element) {
-            return;
-        }
-
-        element.textContent = message;
-        element.hidden = false;
-        element.classList.toggle("success", Boolean(isSuccess));
-    }
-
-    // Xử lý biểu mẫu đăng nhập
-    function setupLoginForm() {
-        const form = document.getElementById("loginForm");
-        const message = document.getElementById("loginMessage");
-
-        if (!form || !message) {
-            return;
-        }
-
-        form.addEventListener("submit", function (event) {
-            event.preventDefault();
-
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-
-            showMessage(
-                message,
-                "Thông tin hợp lệ. Đây là bản demo, website chưa xác thực tài khoản thật.",
-                false
-            );
-        });
-    }
-
     // Xử lý biểu mẫu đăng ký
     function setupRegisterForm() {
         const form = document.getElementById("registerForm");
-        const message = document.getElementById("registerMessage");
         const password = document.getElementById("registerPassword");
         const confirmPassword = document.getElementById("confirmPassword");
         const confirmError = document.getElementById("confirmPasswordError");
         const strengthBar = document.getElementById("passwordStrengthBar");
         const strengthText = document.getElementById("passwordStrengthText");
 
-        if (!form || !message || !password || !confirmPassword) {
+        if (!form || !password || !confirmPassword) {
             return;
         }
 
@@ -179,21 +141,14 @@
             validatePasswordMatch();
         });
 
+        // Chỉ chặn gửi form khi dữ liệu chưa hợp lệ; hợp lệ thì để form POST lên server
         form.addEventListener("submit", function (event) {
-            event.preventDefault();
-
             const passwordsMatch = validatePasswordMatch();
 
             if (!form.checkValidity() || !passwordsMatch) {
+                event.preventDefault();
                 form.reportValidity();
-                return;
             }
-
-            showMessage(
-                message,
-                "Thông tin hợp lệ! Đây là bản demo giao diện; tài khoản chưa được lưu và chưa thể đăng nhập thật.",
-                true
-            );
         });
     }
 })();

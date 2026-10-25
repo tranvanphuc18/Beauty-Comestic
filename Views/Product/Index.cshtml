@@ -1,7 +1,26 @@
-﻿@model IEnumerable<MyPham_Models.Product>
+﻿@model IEnumerable<nv3.Models.Product>
 
 @{
     ViewBag.Title = "Danh sách sản phẩm";
+
+    int page = ViewBag.Page;
+    int totalPages = ViewBag.TotalPages;
+    string keyword = ViewBag.Keyword as string;
+    string category = ViewBag.SelectedCategory as string;
+    string[] selSkin = (ViewBag.SelectedSkinTypes as string[]) ?? new string[0];
+    string[] selBrands = (ViewBag.SelectedBrands as string[]) ?? new string[0];
+
+    // Tạo link chuyển trang nhưng vẫn giữ nguyên từ khóa + bộ lọc đang chọn
+    Func<int, string> pageUrl = p =>
+    {
+        var qs = new List<string>();
+        if (!string.IsNullOrEmpty(keyword)) { qs.Add("keyword=" + HttpUtility.UrlEncode(keyword)); }
+        if (!string.IsNullOrEmpty(category)) { qs.Add("category=" + HttpUtility.UrlEncode(category)); }
+        foreach (var s in selSkin) { qs.Add("skinTypes=" + HttpUtility.UrlEncode(s)); }
+        foreach (var b in selBrands) { qs.Add("brands=" + HttpUtility.UrlEncode(b)); }
+        qs.Add("page=" + p);
+        return Url.Action("Index", "Product") + "?" + string.Join("&", qs);
+    };
 }
 
 <div class="container product-page">
@@ -15,22 +34,24 @@
         <div class="col-lg-9">
             @if (Model == null || !Model.Any())
             {
-                <p>Không có sản phẩm nào phù hợp với bộ lọc.</p>
+                <p>Không có sản phẩm nào phù hợp với từ khóa hoặc bộ lọc.</p>
             }
             else
             {
+                <p class="text-muted">Tìm thấy @ViewBag.TotalItems sản phẩm</p>
+
                 <div class="row g-4">
                     @foreach (var product in Model)
                     {
                         <div class="col-md-6 col-xl-4">
                             <div class="card product-card">
                                 <a class="product-media"
-                                   href="@Url.Action("Detail", "Product", new { id = product.Id })"
+                                   href="@Url.Action("Detail", "Product", new { id = product.ProductID })"
                                    tabindex="-1"
                                    aria-hidden="true">
                                     <img src="@Url.Content("~/Images/" + product.Image)"
                                          class="product-image"
-                                         alt="@product.Name"
+                                         alt="@product.ProductName"
                                          loading="lazy" />
                                 </a>
 
@@ -38,7 +59,7 @@
                                     <span class="product-card-brand">@product.Brand</span>
 
                                     <h4 class="product-name">
-                                        <a href="@Url.Action("Detail", "Product", new { id = product.Id })">@product.Name</a>
+                                        <a href="@Url.Action("Detail", "Product", new { id = product.ProductID })">@product.ProductName</a>
                                     </h4>
 
                                     <p class="product-price">
@@ -46,76 +67,44 @@
                                     </p>
 
                                     <div class="product-buttons">
-                                        @Html.ActionLink(
-                                                      "Xem chi tiết",
-                                                      "Detail",
-                                                      "Product",
-                                                      new { id = product.Id },
-                                                      new { @class = "btn btn-primary" }
-                                                  )
+                                        @Html.ActionLink("Xem chi tiết", "Detail", "Product",
+                                            new { id = product.ProductID }, new { @class = "btn btn-primary" })
 
-                                        <button type="button"
-                                                class="btn btn-danger add-to-cart"
-                                                data-id="@product.Id"
-                                                data-name="@product.Name"
-                                                data-price="@product.Price"
-                                                data-image="@Url.Content("~/Images/" + product.Image)">
-                                            Thêm vào giỏ hàng
-                                        </button>
+                                        @using (Html.BeginForm("Add", "Cart", FormMethod.Post, new { @class = "d-inline" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@product.ProductID" />
+                                            <input type="hidden" name="quantity" value="1" />
+                                            <input type="hidden" name="returnUrl" value="@Request.RawUrl" />
+                                            <button type="submit" class="btn btn-danger">Thêm vào giỏ hàng</button>
+                                        }
                                     </div>
                                 </div>
                             </div>
                         </div>
                     }
                 </div>
+
+                if (totalPages > 1)
+                {
+                    <nav class="mt-4" aria-label="Phân trang sản phẩm">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(page <= 1 ? "disabled" : "")">
+                                <a class="page-link" href="@pageUrl(page - 1)">&laquo;</a>
+                            </li>
+                            @for (int i = 1; i <= totalPages; i++)
+                            {
+                                <li class="page-item @(i == page ? "active" : "")">
+                                    <a class="page-link" href="@pageUrl(i)">@i</a>
+                                </li>
+                            }
+                            <li class="page-item @(page >= totalPages ? "disabled" : "")">
+                                <a class="page-link" href="@pageUrl(page + 1)">&raquo;</a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
             }
         </div>
     </div>
 </div>
-
-@section scripts {
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const cartKey = "beautyCart";
-
-            function getCart() {
-                try {
-                    const data = JSON.parse(localStorage.getItem(cartKey));
-                    return Array.isArray(data) ? data : [];
-                } catch (error) {
-                    return [];
-                }
-            }
-
-            document.querySelectorAll(".add-to-cart").forEach(function (button) {
-                button.addEventListener("click", function () {
-                    const id = Number(button.dataset.id);
-                    const name = button.dataset.name;
-                    const price = Number(button.dataset.price);
-                    const image = button.dataset.image;
-
-                    const cart = getCart();
-                    const existing = cart.find(function (item) {
-                        return Number(item.id) === id;
-                    });
-
-                    if (existing) {
-                        existing.quantity = (Number(existing.quantity) || 1) + 1;
-                    } else {
-                        cart.push({
-                            id: id,
-                            name: name,
-                            price: price,
-                            image: image,
-                            quantity: 1
-                        });
-                    }
-
-                    localStorage.setItem(cartKey, JSON.stringify(cart));
-                    alert("Đã thêm " + name + " vào giỏ hàng!");
-                });
-            });
-        });
-    </script>
-}
-

@@ -1,45 +1,63 @@
-﻿@model MyPham_Models.Product
+﻿@model nv3.Models.Product
 
 @{
-    ViewBag.Title = "Chi tiết sản phẩm";
+    ViewBag.Title = Model.ProductName;
+    bool inStock = Model.Quantity > 0;
 }
 
-<div class="container">
-    <h2>Chi tiết sản phẩm</h2>
-
-    <div class="row">
+<div class="container py-4">
+    <div class="row g-4">
         <div class="col-md-5">
             <img src="@Url.Content("~/Images/" + Model.Image)"
-                 alt="@Model.Name"
-                 class="img-responsive product-detail-image" />
-            
-
-            <div class="col-md-7">
-                <h3>@Model.Name</h3>
-
-                <p>
-                    <strong>Thương hiệu:</strong> @Model.Brand
-                </p>
-
-                <p>
-                    <strong>Giá:</strong> @Model.Price.ToString("N0") VNĐ
-                </p>
-
-                <p>
-                    <strong>Mô tả:</strong> @Model.Description
-                </p>
-                <p style="color: #FFB800; font-size: 14px; margin: 8px 0;">
-                    ★★★★★ <strong>@ViewBag.Rating</strong>
-                    <span style="color: #666; margin-left: 8px;">(@ViewBag.ReviewCount | @ViewBag.SoldCount)</span>
-                </p>
-                @Html.ActionLink(
-                    "Quay lại danh sách",
-                    "Index",
-                    "Product",
-                    null,
-                    new { @class = "btn btn-default" }
-                )
-            </div>
-
+                 alt="@Model.ProductName"
+                 class="img-fluid rounded border p-3 bg-white" />
         </div>
+
+        <div class="col-md-7">
+            <span class="product-card-brand">@Model.Brand</span>
+            <h2 class="mb-3">@Model.ProductName</h2>
+
+            <p class="fs-4 fw-bold text-danger">@Model.Price.ToString("N0") VNĐ</p>
+            <p><strong>Mô tả:</strong> @Model.Description</p>
+            <p class="text-muted">
+                Đã bán @Model.SoldQuantity |
+                @if (inStock)
+                {
+                    <span class="text-success">Còn @Model.Quantity sản phẩm</span>
+                }
+                else
+                {
+                    <span class="text-danger">Hết hàng</span>
+                }
+            </p>
+
+            @if (inStock)
+            {
+                using (Html.BeginForm("Add", "Cart", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.ProductID" />
+                    <input type="hidden" name="returnUrl" value="@Request.RawUrl" />
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <label for="quantity" class="mb-0"><strong>Số lượng:</strong></label>
+                        <input type="number" id="quantity" name="quantity"
+                               class="form-control" style="width:100px"
+                               value="1" min="1" max="@Model.Quantity" required />
+                    </div>
+
+                    <button type="submit" class="btn btn-outline-danger">Thêm vào giỏ hàng</button>
+                    <button type="submit" name="buyNow" value="true" class="btn btn-danger">Mua ngay</button>
+                }
+            }
+            else
+            {
+                <button type="button" class="btn btn-secondary" disabled>Hết hàng</button>
+            }
+
+            <div class="mt-4">
+                @Html.ActionLink("← Quay lại danh sách", "Index", "Product", null, new { @class = "btn btn-link" })
+            </div>
+        </div>
+    </div>
 </div>
