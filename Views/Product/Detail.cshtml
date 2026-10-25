@@ -1,45 +1,91 @@
-﻿@model MyPham_Models.Product
+﻿@model nv3.Models.Product
 
 @{
     ViewBag.Title = "Chi tiết sản phẩm";
+
+    var detail = Model.ProductDetails == null
+        ? null
+        : Model.ProductDetails
+            .OrderBy(d => d.ProductDetailId)
+            .FirstOrDefault();
+
+    var price = detail == null
+        ? 0m
+        : (detail.DiscountedPrice.HasValue
+            ? detail.DiscountedPrice.Value
+            : detail.Price);
 }
 
-<div class="container">
+<div class="container product-detail-page">
     <h2>Chi tiết sản phẩm</h2>
 
     <div class="row">
-        <div class="col-md-5">
+        <div class="col-md-5 mb-4">
             <img src="@Url.Content("~/Images/" + Model.Image)"
                  alt="@Model.Name"
                  class="img-responsive product-detail-image" />
-            
-
-            <div class="col-md-7">
-                <h3>@Model.Name</h3>
-
-                <p>
-                    <strong>Thương hiệu:</strong> @Model.Brand
-                </p>
-
-                <p>
-                    <strong>Giá:</strong> @Model.Price.ToString("N0") VNĐ
-                </p>
-
-                <p>
-                    <strong>Mô tả:</strong> @Model.Description
-                </p>
-                <p style="color: #FFB800; font-size: 14px; margin: 8px 0;">
-                    ★★★★★ <strong>@ViewBag.Rating</strong>
-                    <span style="color: #666; margin-left: 8px;">(@ViewBag.ReviewCount | @ViewBag.SoldCount)</span>
-                </p>
-                @Html.ActionLink(
-                    "Quay lại danh sách",
-                    "Index",
-                    "Product",
-                    null,
-                    new { @class = "btn btn-default" }
-                )
-            </div>
-
         </div>
+
+        <div class="col-md-7">
+            <h3>@Model.Name</h3>
+
+            <p>
+                <strong>Thương hiệu:</strong>
+                @Model.Brand
+            </p>
+
+            <p>
+                <strong>Danh mục:</strong>
+                @(Model.Category == null
+                    ? "Chưa phân loại"
+                    : Model.Category.CategoryName)
+            </p>
+
+            <p>
+                <strong>Giá:</strong>
+                @price.ToString("N0") VNĐ
+            </p>
+
+            @if (detail != null)
+            {
+                <p>
+                    <strong>Tồn kho:</strong>
+                    @detail.Quantity
+                </p>
+            }
+
+            <p>
+                <strong>Mô tả:</strong>
+                @Model.Description
+            </p>
+
+            @if (Model.SkinTypes != null && Model.SkinTypes.Any())
+            {
+                <p>
+                    <strong>Loại da phù hợp:</strong>
+                    @string.Join(
+                             ", ",
+                             Model.SkinTypes.Select(s => s.SkinTypeName)
+                         )
+                </p>
+            }
+
+            <p style="color: #FFB800; font-size: 14px; margin: 8px 0;">
+                ★★★★★
+                <strong>@ViewBag.Rating</strong>
+
+                <span style="color: #666; margin-left: 8px;">
+                    (@ViewBag.ReviewCount | @ViewBag.SoldCount)
+                </span>
+            </p>
+
+            @Html.ActionLink(
+                     "Quay lại danh sách",
+                     "Index",
+                     "Product",
+                     null,
+                     new { @class = "btn btn-default" }
+                 )
+        </div>
+    </div>
 </div>
