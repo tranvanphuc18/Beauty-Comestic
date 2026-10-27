@@ -1,4 +1,5 @@
-﻿@{
+﻿@model nv3.ViewModels.HomeViewModel
+@{
     ViewBag.Title = "Trang chủ";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -124,70 +125,34 @@
             </a>
         </div>
 
+        @{
+            // Ảnh + mô tả minh họa cho từng danh mục (tra theo Slug lấy từ database)
+            var catMeta = new Dictionary<string, string[]>
+            {
+                { "cham-soc-da", new[] { "https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=650&q=80", "category-image-skincare", "Làm sạch và nuôi dưỡng" } },
+                { "trang-diem",  new[] { "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=650&q=80", "category-image-makeup", "Tôn lên nét đẹp riêng" } },
+                { "chong-nang",  new[] { "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=650&q=80", "category-image-sunscreen", "Bảo vệ da mỗi ngày" } },
+                { "duong-am",    new[] { "https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=650&q=80", "category-image-moisturizer", "Cho làn da mềm mịn" } }
+            };
+        }
         <div class="row g-3 g-md-4">
-            <div class="col-6 col-lg-3">
-                <a class="category-card"
-                   href="@Url.Action("Index", "Product", new { category = "cham-soc-da" })">
-                    <div class="category-image category-image-skincare">
-                        <img src="https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=650&q=80"
-                             alt="Danh mục chăm sóc da"
-                             loading="lazy" />
-                        <span class="category-arrow" aria-hidden="true">↗</span>
-                    </div>
-                    <div class="category-info">
-                        <h3>Chăm sóc da</h3>
-                        <p>Làm sạch và nuôi dưỡng</p>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-6 col-lg-3">
-                <a class="category-card"
-                   href="@Url.Action("Index", "Product", new { category = "trang-diem" })">
-                    <div class="category-image category-image-makeup">
-                        <img src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=650&q=80"
-                             alt="Danh mục trang điểm"
-                             loading="lazy" />
-                        <span class="category-arrow" aria-hidden="true">↗</span>
-                    </div>
-                    <div class="category-info">
-                        <h3>Trang điểm</h3>
-                        <p>Tôn lên nét đẹp riêng</p>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-6 col-lg-3">
-                <a class="category-card"
-                   href="@Url.Action("Index", "Product", new { category = "chong-nang" })">
-                    <div class="category-image category-image-sunscreen">
-                        <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=650&q=80"
-                             alt="Danh mục chống nắng"
-                             loading="lazy" />
-                        <span class="category-arrow" aria-hidden="true">↗</span>
-                    </div>
-                    <div class="category-info">
-                        <h3>Chống nắng</h3>
-                        <p>Bảo vệ da mỗi ngày</p>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-6 col-lg-3">
-                <a class="category-card"
-                   href="@Url.Action("Index", "Product", new { category = "duong-am" })">
-                    <div class="category-image category-image-moisturizer">
-                        <img src="https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=650&q=80"
-                             alt="Danh mục dưỡng ẩm"
-                             loading="lazy" />
-                        <span class="category-arrow" aria-hidden="true">↗</span>
-                    </div>
-                    <div class="category-info">
-                        <h3>Dưỡng ẩm</h3>
-                        <p>Cho làn da mềm mịn</p>
-                    </div>
-                </a>
-            </div>
+            @foreach (var c in Model.Categories)
+            {
+                var meta = catMeta.ContainsKey(c.Slug) ? catMeta[c.Slug] : catMeta["cham-soc-da"];
+                <div class="col-6 col-lg-3">
+                    <a class="category-card"
+                       href="@Url.Action("Index", "Product", new { category = c.Slug })">
+                        <div class="category-image @meta[1]">
+                            <img src="@meta[0]" alt="Danh mục @c.CategoryName" loading="lazy" />
+                            <span class="category-arrow" aria-hidden="true">↗</span>
+                        </div>
+                        <div class="category-info">
+                            <h3>@c.CategoryName</h3>
+                            <p>@meta[2]</p>
+                        </div>
+                    </a>
+                </div>
+            }
         </div>
     </div>
 </section>
@@ -210,123 +175,31 @@
         </div>
 
         <div class="row g-3 g-md-4">
-            <div class="col-6 col-lg-3">
-                <article class="home-product-card">
-                    <a class="home-product-image"
-                       href="@Url.Action("Index", "Product")"
-                       aria-label="Khám phá sản phẩm chăm sóc da">
-                        <span class="product-label">Gợi ý</span>
-                        <img src="https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=650&q=80"
-                             alt="Bộ sản phẩm chăm sóc da"
-                             loading="lazy" />
-                    </a>
-                    <div class="home-product-info">
-                        <span class="product-brand">SKINCARE</span>
-                        <h3>
-                            <a href="@Url.Action("Index", "Product")">
-                                Bộ chăm sóc da hằng ngày
-                            </a>
-                        </h3>
-                        <p class="product-description">
-                            Gợi ý cho chu trình dưỡng da
-                        </p>
-                        <a class="product-view-link"
-                           href="@Url.Action("Index", "Product")">
-                            Xem sản phẩm <span aria-hidden="true">→</span>
+            @foreach (var p in Model.FeaturedProducts)
+            {
+                <div class="col-6 col-lg-3">
+                    <article class="home-product-card">
+                        <a class="home-product-image"
+                           href="@Url.Action("Detail", "Product", new { id = p.ProductID })"
+                           aria-label="Xem @p.ProductName">
+                            <img src="@Url.Content("~/Images/" + p.Image)"
+                                 alt="@p.ProductName"
+                                 loading="lazy" />
                         </a>
-                    </div>
-                </article>
-            </div>
-
-            <div class="col-6 col-lg-3">
-                <article class="home-product-card">
-                    <a class="home-product-image"
-                       href="@Url.Action("Index", "Product")"
-                       aria-label="Khám phá sản phẩm dưỡng ẩm">
-                        <span class="product-label">Dưỡng da</span>
-                        <img src="https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=650&q=80"
-                             alt="Sản phẩm dưỡng ẩm"
-                             loading="lazy" />
-                    </a>
-                    <div class="home-product-info">
-                        <span class="product-brand">MOISTURIZER</span>
-                        <h3>
-                            <a href="@Url.Action("Index", "Product")">
-                                Chăm sóc và dưỡng ẩm
+                        <div class="home-product-info">
+                            <span class="product-brand">@p.Brand</span>
+                            <h3>
+                                <a href="@Url.Action("Detail", "Product", new { id = p.ProductID })">@p.ProductName</a>
+                            </h3>
+                            <p class="product-description">@p.Price.ToString("N0") VNĐ</p>
+                            <a class="product-view-link"
+                               href="@Url.Action("Detail", "Product", new { id = p.ProductID })">
+                                Xem sản phẩm <span aria-hidden="true">→</span>
                             </a>
-                        </h3>
-                        <p class="product-description">
-                            Bổ sung độ ẩm cho làn da
-                        </p>
-                        <a class="product-view-link"
-                           href="@Url.Action("Index", "Product")">
-                            Xem sản phẩm <span aria-hidden="true">→</span>
-                        </a>
-                    </div>
-                </article>
-            </div>
-
-            <div class="col-6 col-lg-3">
-                <article class="home-product-card">
-                    <a class="home-product-image"
-                       href="@Url.Action("Index", "Product")"
-                       aria-label="Khám phá sản phẩm trang điểm">
-                        <span class="product-label">Làm đẹp</span>
-                        <img src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=650&q=80"
-                             alt="Sản phẩm trang điểm"
-                             loading="lazy" />
-                    </a>
-                    <div class="home-product-info">
-                        <span class="product-brand">MAKEUP</span>
-                        <h3>
-                            <a href="@Url.Action("Index", "Product")">
-                                Bộ sưu tập trang điểm
-                            </a>
-                        </h3>
-                        <p class="product-description">
-                            Hoàn thiện phong cách của bạn
-                        </p>
-                        <a class="product-view-link"
-                           href="@Url.Action("Index", "Product")">
-                            Xem sản phẩm <span aria-hidden="true">→</span>
-                        </a>
-                    </div>
-                </article>
-            </div>
-
-            <div class="col-6 col-lg-3">
-                <article class="home-product-card">
-                    <a class="home-product-image"
-                       href="@Url.Action("Index", "Product")"
-                       aria-label="Khám phá sản phẩm chống nắng">
-                        <span class="product-label">Mỗi ngày</span>
-                        <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=650&q=80"
-                             alt="Sản phẩm chăm sóc da và chống nắng"
-                             loading="lazy" />
-                    </a>
-                    <div class="home-product-info">
-                        <span class="product-brand">SUN CARE</span>
-                        <h3>
-                            <a href="@Url.Action("Index", "Product")">
-                                Chăm sóc da dưới nắng
-                            </a>
-                        </h3>
-                        <p class="product-description">
-                            Bước chăm sóc không nên bỏ qua
-                        </p>
-                        <a class="product-view-link"
-                           href="@Url.Action("Index", "Product")">
-                            Xem sản phẩm <span aria-hidden="true">→</span>
-                        </a>
-                    </div>
-                </article>
-            </div>
-        </div>
-
-        <div class="featured-note">
-            <span aria-hidden="true">♡</span>
-            Đây là các gợi ý minh họa. Danh sách và thông tin sản phẩm chính thức
-            sẽ được hiển thị tại trang sản phẩm của nhóm.
+                        </div>
+                    </article>
+                </div>
+            }
         </div>
     </div>
 </section>

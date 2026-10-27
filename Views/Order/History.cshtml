@@ -1,0 +1,46 @@
+﻿@model List<nv3.Models.Order>
+
+@{
+    ViewBag.Title = "Lịch sử giao dịch";
+}
+
+<section class="container py-5">
+    <h2 class="mb-4">Lịch sử giao dịch</h2>
+
+    @if (!Model.Any())
+    {
+        <p class="text-muted">Bạn chưa có đơn hàng nào.</p>
+        <a href="@Url.Action("Index", "Product")" class="btn btn-danger">Mua sắm ngay</a>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Mã đơn</th>
+                        <th>Ngày đặt</th>
+                        <th class="text-end">Tổng tiền</th>
+                        <th>Thanh toán</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var o in Model)
+                    {
+                        <tr>
+                            <td>#@o.OrderID</td>
+                            <td>@o.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="text-end">@o.TotalAmount.ToString("N0") ₫</td>
+                            <td>@o.PaymentStatus</td>
+                            <td class="text-end">
+                                <a href="@Url.Action("Detail", "Order", new { id = o.OrderID })"
+                                   class="btn btn-outline-secondary btn-sm">Xem chi tiết</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

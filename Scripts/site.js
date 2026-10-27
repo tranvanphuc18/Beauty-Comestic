@@ -1,11 +1,10 @@
 ﻿(function () {
     "use strict";
 
-    const CART_KEY = "beautyCart";
 
     function readCart() {
         try {
-            const data = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+            const data = JSON.parse;
             return Array.isArray(data) ? data : [];
         } catch (error) {
             return [];
@@ -19,7 +18,7 @@
             return;
         }
 
-        const cart = readCart();
+        
         const total = cart.reduce(function (sum, item) {
             const quantity = Number(item.quantity) || 0;
             return sum + Math.max(0, quantity);
@@ -66,14 +65,8 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         setupMobileMenu();
-        updateCartBadge();
     });
 
-    window.addEventListener("storage", function (event) {
-        if (event.key === CART_KEY) {
-            updateCartBadge();
-        }
-    });
+    
 
-    window.addEventListener("beautyCartUpdated", updateCartBadge);
 })();5

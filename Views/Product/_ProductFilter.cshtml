@@ -55,6 +55,15 @@
         {
             <h2 class="product-filter__heading h5 d-none d-lg-block">Bộ lọc sản phẩm</h2>
 
+            @if (!string.IsNullOrEmpty(ViewBag.Keyword as string))
+            {
+                <input type="hidden" name="keyword" value="@ViewBag.Keyword" />
+            }
+            @if (!string.IsNullOrEmpty(ViewBag.SelectedCategory as string))
+            {
+                <input type="hidden" name="category" value="@ViewBag.SelectedCategory" />
+            }
+
             <div id="product-filter-chips" class="product-filter__chips d-flex flex-wrap gap-2 mb-3" hidden></div>
 
             <fieldset class="product-filter__group mb-4">

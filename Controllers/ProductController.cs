@@ -1,181 +1,92 @@
-﻿using nv3.Models;
-using System;
-using System.Collections.Generic;
-using System.Data.Entity;
+﻿using System;
 using System.Linq;
+using System.Net;
 using System.Web.Mvc;
+using nv3.Models;
 
 namespace nv3.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly BeautyCosmeticDBEntities db =
-            new BeautyCosmeticDBEntities();
+        private const int PageSize = 9;
+        private BeautyCosmeticEntities db = new BeautyCosmeticEntities();
 
-        public ActionResult Index(
-            string keyword,
-            string category,
-            string[] skinTypes,
-            string[] brands)
+        public ActionResult Index(string keyword, string category, string[] skinTypes, string[] brands, int page = 1)
         {
             skinTypes = skinTypes ?? new string[0];
             brands = brands ?? new string[0];
+            if (page < 1) page = 1;
 
-            var products = db.Products
-                .Include(p => p.Category)
-                .Include(p => p.ProductDetails)
-                .Include(p => p.SkinTypes)
-                .ToList();
+            // 1) Chỉ lấy sản phẩm còn hàng
+            var query = db.Products.Where(p => p.Quantity > 0);
 
-            IEnumerable<Product> result = products;
-
+            // 2) Tìm kiếm theo tên, thương hiệu, mô tả
             if (!string.IsNullOrWhiteSpace(keyword))
             {
                 string kw = keyword.Trim();
-
-                result = result.Where(p =>
-                    (p.Name != null &&
-                     p.Name.IndexOf(
-                         kw,
-                         StringComparison.OrdinalIgnoreCase) >= 0) ||
-
-                    (p.Brand != null &&
-                     p.Brand.IndexOf(
-                         kw,
-                         StringComparison.OrdinalIgnoreCase) >= 0) ||
-
-                    (p.Description != null &&
-                     p.Description.IndexOf(
-                         kw,
-                         StringComparison.OrdinalIgnoreCase) >= 0));
+                query = query.Where(p => p.ProductName.Contains(kw)
+                                      || p.Brand.Contains(kw)
+                                      || p.Description.Contains(kw));
             }
 
-            if (!string.IsNullOrWhiteSpace(category))
+            // 3) Lọc theo danh mục (slug)
+            if (!string.IsNullOrEmpty(category))
             {
-                string selectedCategory =
-                    category.Trim().ToLowerInvariant();
-
-                result = result.Where(p =>
-                {
-                    string categoryName = p.Category == null
-                        ? ""
-                        : (p.Category.CategoryName ?? "")
-                            .ToLowerInvariant();
-
-                    switch (selectedCategory)
-                    {
-                        case "cham-soc-da":
-                            return categoryName.Contains("chăm sóc da")
-                                || categoryName.Contains("cham soc da");
-
-                        case "trang-diem":
-                            return categoryName.Contains("trang điểm")
-                                || categoryName.Contains("trang diem")
-                                || categoryName.Contains("makeup");
-
-                        case "chong-nang":
-                            return categoryName.Contains("chống nắng")
-                                || categoryName.Contains("chong nang");
-
-                        case "duong-am":
-                            return categoryName.Contains("dưỡng ẩm")
-                                || categoryName.Contains("duong am");
-
-                        default:
-                            return true;
-                    }
-                });
+                query = query.Where(p => p.Category.Slug == category);
             }
 
+            var list = query.OrderBy(p => p.ProductID).ToList();
+
+            // 4) Lọc loại da (SkinTypes lưu dạng "oily,dry") - lọc trong bộ nhớ cho đơn giản
             if (skinTypes.Length > 0)
             {
-                var selectedSkinNames = skinTypes
-                    .Select(MapSkinTypeName)
-                    .ToList();
-
-                result = result.Where(p =>
-                    p.SkinTypes.Any(s =>
-                        selectedSkinNames.Contains(
-                            (s.SkinTypeName ?? "").Trim(),
-                            StringComparer.OrdinalIgnoreCase)));
+                list = list.Where(p => !string.IsNullOrEmpty(p.SkinTypes)
+                    && p.SkinTypes.Split(',').Select(s => s.Trim()).Intersect(skinTypes).Any()).ToList();
             }
 
+            // 5) Lọc thương hiệu (value trong filter = tên viết thường, thay dấu cách bằng "-")
             if (brands.Length > 0)
             {
-                result = result.Where(p =>
-                    brands.Any(b =>
-                        string.Equals(
-                            (p.Brand ?? "").Replace(" ", "-"),
-                            b,
-                            StringComparison.OrdinalIgnoreCase)));
+                list = list.Where(p => brands.Contains(p.Brand.ToLower().Replace(" ", "-"))).ToList();
             }
+
+            // 6) Phân trang
+            int totalItems = list.Count;
+            int totalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
+            if (totalPages < 1) totalPages = 1;
+            if (page > totalPages) page = totalPages;
+
+            var items = list.Skip((page - 1) * PageSize).Take(PageSize).ToList();
 
             ViewBag.Keyword = keyword;
             ViewBag.SelectedSkinTypes = skinTypes;
             ViewBag.SelectedBrands = brands;
             ViewBag.SelectedCategory = category;
+            ViewBag.Page = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalItems = totalItems;
 
-            return View(result.OrderBy(p => p.ProductId).ToList());
+            return View(items);
         }
 
-        public ActionResult Detail(int id)
+        public ActionResult Detail(int? id)
         {
-            var product = db.Products
-                .Include(p => p.Category)
-                .Include(p => p.ProductDetails)
-                .Include(p => p.SkinTypes)
-                .FirstOrDefault(p => p.ProductId == id);
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
 
+            var product = db.Products.Find(id);
             if (product == null)
             {
                 return HttpNotFound();
             }
-
-            ViewBag.Rating = product.Rating.ToString("0.0");
-            ViewBag.ReviewCount = "Đánh giá của khách hàng";
-
-            var detail = product.ProductDetails
-                .OrderBy(d => d.ProductDetailId)
-                .FirstOrDefault();
-
-            ViewBag.SoldCount = detail == null
-                ? "Chưa có dữ liệu bán"
-                : "Đã bán " + detail.SoldQuantity;
-
             return View(product);
-        }
-
-        private static string MapSkinTypeName(string value)
-        {
-            switch ((value ?? "").Trim().ToLowerInvariant())
-            {
-                case "oily":
-                    return "Da dầu";
-
-                case "dry":
-                    return "Da khô";
-
-                case "combination":
-                    return "Da hỗn hợp";
-
-                case "sensitive":
-                    return "Da nhạy cảm";
-
-                case "normal":
-                    return "Da thường";
-
-                default:
-                    return value;
-            }
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-
+            if (disposing) db.Dispose();
             base.Dispose(disposing);
         }
     }

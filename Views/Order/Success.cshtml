@@ -1,0 +1,16 @@
+﻿@model nv3.Models.Order
+
+@{
+    ViewBag.Title = "Đặt hàng thành công";
+}
+
+<section class="container py-5 text-center">
+    <h2 class="mb-3">🎉 Đặt hàng thành công!</h2>
+    <p>Mã đơn hàng của bạn: <strong>#@Model.OrderID</strong></p>
+    <p>Tổng tiền: <strong>@Model.TotalAmount.ToString("N0") ₫</strong></p>
+    <p class="text-muted">Cảm ơn bạn đã mua sắm tại BeautyCosmetic.</p>
+
+    <a href="@Url.Action("Detail", "Order", new { id = Model.OrderID })" class="btn btn-danger">Xem hóa đơn</a>
+    <a href="@Url.Action("History", "Order")" class="btn btn-outline-secondary">Lịch sử đơn hàng</a>
+    <a href="@Url.Action("Index", "Product")" class="btn btn-outline-secondary">Tiếp tục mua sắm</a>
+</section>
