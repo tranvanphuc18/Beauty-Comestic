@@ -14,7 +14,7 @@ namespace BeautyCosmetic.Controllers
             return View();
         }
 
-        public ActionResult Profile()
+        public new ActionResult Profile()
         {
             return View();
         }
