@@ -43,6 +43,18 @@
                 <div class="row g-4">
                     @foreach (var product in Model)
                     {
+                        var detail = product.ProductDetails == null
+                            ? null
+                            : product.ProductDetails
+                                .OrderBy(d => d.ProductDetailId)
+                                .FirstOrDefault();
+
+                        var price = detail == null
+                            ? 0m
+                            : (detail.DiscountedPrice.HasValue
+                                ? detail.DiscountedPrice.Value
+                                : detail.Price);
+
                         <div class="col-md-6 col-xl-4">
                             <div class="card product-card">
                                 <a class="product-media"
@@ -56,14 +68,17 @@
                                 </a>
 
                                 <div class="card-body">
-                                    <span class="product-card-brand">@product.Brand</span>
+                                    <span class="product-card-brand">
+                                        @product.Brand
+                                    </span>
 
                                     <h4 class="product-name">
                                         <a href="@Url.Action("Detail", "Product", new { id = product.ProductID })">@product.ProductName</a>
                                     </h4>
 
                                     <p class="product-price">
-                                        @product.Price.ToString("N0") <small>VNĐ</small>
+                                        @price.ToString("N0")
+                                        <small>VNĐ</small>
                                     </p>
 
                                     <div class="product-buttons">
