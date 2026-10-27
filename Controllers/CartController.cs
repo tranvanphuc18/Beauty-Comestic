@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Data.Entity;
+using System.Linq;
 using System.Web.Mvc;
 using nv3.Helpers;
 using nv3.Models;
@@ -8,7 +9,7 @@ namespace nv3.Controllers
 {
     public class CartController : Controller
     {
-        private BeautyCosmeticEntities db = new BeautyCosmeticEntities();
+        private BeautyCosmeticDBEntities db = new BeautyCosmeticDBEntities();
 
         public ActionResult Index()
         {
@@ -24,16 +25,19 @@ namespace nv3.Controllers
             return Content(count > 99 ? "99+" : count.ToString());
         }
 
+        // id = ProductDetailId (biến thể sản phẩm), không phải ProductId
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Add(int id, int? quantity, string returnUrl, bool buyNow = false)
         {
-            var product = db.Products.Find(id);
-            if (product == null)
+            var detail = db.ProductDetails.Include(d => d.Product)
+                           .FirstOrDefault(d => d.ProductDetailId == id);
+            if (detail == null)
             {
                 return HttpNotFound();
             }
 
+            string name = detail.Product.Name + " (" + detail.DetailName + ")";
             int qty = quantity ?? 1;
             if (qty < 1)
             {
@@ -41,34 +45,26 @@ namespace nv3.Controllers
                 return RedirectBack(returnUrl);
             }
 
-            if (product.Quantity <= 0)
+            if (detail.Quantity <= 0)
             {
-                TempData["Error"] = "Sản phẩm \"" + product.ProductName + "\" đã hết hàng.";
+                TempData["Error"] = "Sản phẩm \"" + name + "\" đã hết hàng.";
                 return RedirectBack(returnUrl);
             }
 
             var cart = CartHelper.GetCart();
-            var item = cart.FirstOrDefault(i => i.ProductID == id);
+            var item = cart.FirstOrDefault(i => i.ProductDetailId == id);
             int current = item == null ? 0 : item.Quantity;
 
-            if (current + qty > product.Quantity)
+            if (current + qty > detail.Quantity)
             {
-                TempData["Error"] = "Chỉ còn " + product.Quantity + " sản phẩm \"" + product.ProductName
+                TempData["Error"] = "Chỉ còn " + detail.Quantity + " sản phẩm \"" + name
                                     + "\" (trong giỏ đã có " + current + ").";
                 return RedirectBack(returnUrl);
             }
 
             if (item == null)
             {
-                cart.Add(new CartItem
-                {
-                    ProductID = product.ProductID,
-                    ProductName = product.ProductName,
-                    Image = product.Image,
-                    Price = product.Price,
-                    Quantity = qty,
-                    Stock = product.Quantity
-                });
+                cart.Add(CartHelper.ToCartItem(detail, qty));
             }
             else
             {
@@ -80,7 +76,7 @@ namespace nv3.Controllers
                 return RedirectToAction("Index");
             }
 
-            TempData["Success"] = "Đã thêm \"" + product.ProductName + "\" vào giỏ hàng.";
+            TempData["Success"] = "Đã thêm \"" + name + "\" vào giỏ hàng.";
             return RedirectBack(returnUrl);
         }
 
@@ -88,11 +84,11 @@ namespace nv3.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Update(int id, int? quantity)
         {
-            var product = db.Products.Find(id);
+            var detail = db.ProductDetails.Find(id);
             var cart = CartHelper.GetCart();
-            var item = cart.FirstOrDefault(i => i.ProductID == id);
+            var item = cart.FirstOrDefault(i => i.ProductDetailId == id);
 
-            if (item == null || product == null)
+            if (item == null || detail == null)
             {
                 return RedirectToAction("Index");
             }
@@ -101,9 +97,9 @@ namespace nv3.Controllers
             {
                 TempData["Error"] = "Số lượng phải là số nguyên từ 1 trở lên. Muốn bỏ sản phẩm hãy bấm Xóa.";
             }
-            else if (quantity > product.Quantity)
+            else if (quantity > detail.Quantity)
             {
-                TempData["Error"] = "Chỉ còn " + product.Quantity + " sản phẩm \"" + product.ProductName + "\" trong kho.";
+                TempData["Error"] = "Chỉ còn " + detail.Quantity + " sản phẩm \"" + item.ProductName + "\" trong kho.";
             }
             else
             {
@@ -118,7 +114,7 @@ namespace nv3.Controllers
         public ActionResult Remove(int id)
         {
             var cart = CartHelper.GetCart();
-            cart.RemoveAll(i => i.ProductID == id);
+            cart.RemoveAll(i => i.ProductDetailId == id);
             return RedirectToAction("Index");
         }
 

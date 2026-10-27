@@ -126,7 +126,7 @@
         </div>
 
         @{
-            // Ảnh + mô tả minh họa cho từng danh mục (tra theo Slug lấy từ database)
+            // Ảnh + mô tả minh họa cho từng danh mục (tra theo slug của CategoryName)
             var catMeta = new Dictionary<string, string[]>
             {
                 { "cham-soc-da", new[] { "https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=650&q=80", "category-image-skincare", "Làm sạch và nuôi dưỡng" } },
@@ -138,10 +138,11 @@
         <div class="row g-3 g-md-4">
             @foreach (var c in Model.Categories)
             {
-                var meta = catMeta.ContainsKey(c.Slug) ? catMeta[c.Slug] : catMeta["cham-soc-da"];
+                string slug = nv3.Helpers.ProductHelper.ToSlug(c.CategoryName);
+                var meta = catMeta.ContainsKey(slug) ? catMeta[slug] : catMeta["cham-soc-da"];
                 <div class="col-6 col-lg-3">
                     <a class="category-card"
-                       href="@Url.Action("Index", "Product", new { category = c.Slug })">
+                       href="@Url.Action("Index", "Product", new { category = slug })">
                         <div class="category-image @meta[1]">
                             <img src="@meta[0]" alt="Danh mục @c.CategoryName" loading="lazy" />
                             <span class="category-arrow" aria-hidden="true">↗</span>
@@ -180,20 +181,20 @@
                 <div class="col-6 col-lg-3">
                     <article class="home-product-card">
                         <a class="home-product-image"
-                           href="@Url.Action("Detail", "Product", new { id = p.ProductID })"
-                           aria-label="Xem @p.ProductName">
+                           href="@Url.Action("Detail", "Product", new { id = p.ProductId })"
+                           aria-label="Xem @p.Name">
                             <img src="@Url.Content("~/Images/" + p.Image)"
-                                 alt="@p.ProductName"
+                                 alt="@p.Name"
                                  loading="lazy" />
                         </a>
                         <div class="home-product-info">
                             <span class="product-brand">@p.Brand</span>
                             <h3>
-                                <a href="@Url.Action("Detail", "Product", new { id = p.ProductID })">@p.ProductName</a>
+                                <a href="@Url.Action("Detail", "Product", new { id = p.ProductId })">@p.Name</a>
                             </h3>
-                            <p class="product-description">@p.Price.ToString("N0") VNĐ</p>
+                            <p class="product-description">@nv3.Helpers.ProductHelper.DisplayPrice(p).ToString("N0") VNĐ</p>
                             <a class="product-view-link"
-                               href="@Url.Action("Detail", "Product", new { id = p.ProductID })">
+                               href="@Url.Action("Detail", "Product", new { id = p.ProductId })">
                                 Xem sản phẩm <span aria-hidden="true">→</span>
                             </a>
                         </div>

@@ -36,7 +36,7 @@
                 <div class="mb-3">
                     <label class="form-label" for="ShippingAddress">Địa chỉ giao hàng</label>
                     <input type="text" class="form-control" id="ShippingAddress" name="ShippingAddress"
-                           value="@Model.ShippingAddress" maxlength="255" required />
+                           value="@Model.ShippingAddress" maxlength="150" required />
                 </div>
                 <p class="text-muted">Hình thức thanh toán: thanh toán khi nhận hàng (COD).</p>
 
@@ -51,7 +51,7 @@
                 @foreach (var item in Model.Items)
                 {
                     <div class="d-flex justify-content-between border-bottom py-2">
-                        <span>@item.ProductName × @item.Quantity</span>
+                        <span>@item.ProductName (@item.DetailName) × @item.Quantity</span>
                         <span>@item.Total.ToString("N0") ₫</span>
                     </div>
                 }

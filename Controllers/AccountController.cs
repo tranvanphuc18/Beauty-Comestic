@@ -10,7 +10,7 @@ namespace nv3.Controllers
 {
     public class AccountController : Controller
     {
-        private BeautyCosmeticEntities db = new BeautyCosmeticEntities();
+        private BeautyCosmeticDBEntities db = new BeautyCosmeticDBEntities();
 
         // ---------- ĐĂNG KÝ ----------
         [HttpGet]
@@ -31,20 +31,21 @@ namespace nv3.Controllers
             string email = model.Email.Trim().ToLower();
 
             // Phát hiện tài khoản trùng
-            if (db.Customers.Any(c => c.Email == email))
+            if (db.Users.Any(u => u.Email == email))
             {
                 ModelState.AddModelError("Email", "Email này đã được đăng ký. Vui lòng dùng email khác hoặc đăng nhập.");
                 return View(model);
             }
 
-            var customer = new Customer
+            var user = new User
             {
                 FullName = model.FullName.Trim(),
                 Email = email,
                 PasswordHash = PasswordHelper.Hash(model.Password),
-                CreatedDate = DateTime.Now
+                Role = "Customer",
+                CreatedAt = DateTime.Now
             };
-            db.Customers.Add(customer);
+            db.Users.Add(user);
             db.SaveChanges();
 
             TempData["Success"] = "Đăng ký thành công! Vui lòng đăng nhập.";
@@ -75,7 +76,7 @@ namespace nv3.Controllers
             }
 
             string email = model.Email.Trim().ToLower();
-            var customer = db.Customers.FirstOrDefault(c => c.Email == email);
+            var customer = db.Users.FirstOrDefault(u => u.Email == email);
 
             if (customer == null || !PasswordHelper.Verify(model.Password, customer.PasswordHash))
             {
@@ -83,7 +84,7 @@ namespace nv3.Controllers
                 return View(model);
             }
 
-            Session["CustomerID"] = customer.CustomerID;
+            Session["CustomerID"] = customer.UserId;
             Session["CustomerName"] = customer.FullName;
 
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
@@ -106,7 +107,7 @@ namespace nv3.Controllers
         public ActionResult Profile()
         {
             int customerId = (int)Session["CustomerID"];
-            var customer = db.Customers.Find(customerId);
+            var customer = db.Users.Find(customerId);
             if (customer == null)
             {
                 return RedirectToAction("Logout");
@@ -117,7 +118,7 @@ namespace nv3.Controllers
                 FullName = customer.FullName,
                 Email = customer.Email,
                 Phone = customer.Phone,
-                SkinType = customer.SkinType
+                Address = customer.Address
             });
         }
 
@@ -127,7 +128,7 @@ namespace nv3.Controllers
         public ActionResult Profile(ProfileViewModel model)
         {
             int customerId = (int)Session["CustomerID"];
-            var customer = db.Customers.Find(customerId);
+            var customer = db.Users.Find(customerId);
             if (customer == null)
             {
                 return RedirectToAction("Logout");
@@ -142,7 +143,7 @@ namespace nv3.Controllers
 
             customer.FullName = model.FullName.Trim();
             customer.Phone = string.IsNullOrWhiteSpace(model.Phone) ? null : model.Phone.Trim();
-            customer.SkinType = string.IsNullOrWhiteSpace(model.SkinType) ? null : model.SkinType;
+            customer.Address = string.IsNullOrWhiteSpace(model.Address) ? null : model.Address.Trim();
             db.SaveChanges();
 
             Session["CustomerName"] = customer.FullName;

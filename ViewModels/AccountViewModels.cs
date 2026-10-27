@@ -43,6 +43,7 @@ namespace nv3.ViewModels
         [RegularExpression(@"^0[0-9]{9}$", ErrorMessage = "Số điện thoại gồm 10 chữ số, bắt đầu bằng số 0.")]
         public string Phone { get; set; }
 
-        public string SkinType { get; set; }
+        [StringLength(300, ErrorMessage = "Địa chỉ tối đa 300 ký tự.")]
+        public string Address { get; set; }
     }
 }

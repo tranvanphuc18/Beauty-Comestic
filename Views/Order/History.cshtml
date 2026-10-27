@@ -29,12 +29,12 @@
                     @foreach (var o in Model)
                     {
                         <tr>
-                            <td>#@o.OrderID</td>
+                            <td>#@o.OrderId</td>
                             <td>@o.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
                             <td class="text-end">@o.TotalAmount.ToString("N0") ₫</td>
                             <td>@o.PaymentStatus</td>
                             <td class="text-end">
-                                <a href="@Url.Action("Detail", "Order", new { id = o.OrderID })"
+                                <a href="@Url.Action("Detail", "Order", new { id = o.OrderId })"
                                    class="btn btn-outline-secondary btn-sm">Xem chi tiết</a>
                             </td>
                         </tr>

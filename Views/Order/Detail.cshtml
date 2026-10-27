@@ -1,20 +1,20 @@
 ﻿@model nv3.Models.Order
 
 @{
-    ViewBag.Title = "Hóa đơn #" + Model.OrderID;
+    ViewBag.Title = "Hóa đơn #" + Model.OrderId;
 }
 
 <section class="container py-5">
-    <h2 class="mb-4">Hóa đơn #@Model.OrderID</h2>
+    <h2 class="mb-4">Hóa đơn #@Model.OrderId</h2>
 
     <div class="row mb-4">
         <div class="col-md-6">
-            <p><strong>Người nhận:</strong> @Model.ReceiverName</p>
-            <p><strong>Điện thoại:</strong> @Model.ReceiverPhone</p>
-            <p><strong>Địa chỉ:</strong> @Model.ShippingAddress</p>
+            <p><strong>Giao đến:</strong> @Model.ShippingAddress</p>
+            <p><strong>Trạng thái đơn:</strong> @Model.OrderStatus</p>
         </div>
         <div class="col-md-6">
             <p><strong>Ngày đặt:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+            <p><strong>Hình thức thanh toán:</strong> @Model.PaymentMethod</p>
             <p><strong>Thanh toán:</strong> @Model.PaymentStatus</p>
         </div>
     </div>
@@ -33,10 +33,10 @@
                 @foreach (var d in Model.OrderDetails)
                 {
                     <tr>
-                        <td>@d.Product.ProductName</td>
+                        <td>@d.ProductDetail.Product.Name <small class="text-muted">(@d.ProductDetail.DetailName)</small></td>
                         <td class="text-end">@d.UnitPrice.ToString("N0") ₫</td>
                         <td class="text-end">@d.Quantity</td>
-                        <td class="text-end">@((d.UnitPrice * d.Quantity).ToString("N0")) ₫</td>
+                        <td class="text-end">@d.LineTotal.ToString("N0") ₫</td>
                     </tr>
                 }
             </tbody>
@@ -50,7 +50,7 @@
     </div>
 
     <div class="d-flex gap-2">
-        @using (Html.BeginForm("Reorder", "Order", new { id = Model.OrderID }, FormMethod.Post))
+        @using (Html.BeginForm("Reorder", "Order", new { id = Model.OrderId }, FormMethod.Post))
         {
             @Html.AntiForgeryToken()
             <button type="submit" class="btn btn-danger">Mua lại</button>

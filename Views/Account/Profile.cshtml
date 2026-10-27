@@ -2,7 +2,6 @@
 @{
     ViewBag.Title = "Hồ sơ cá nhân";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var skinTypes = new[] { "Da dầu", "Da khô", "Da hỗn hợp", "Da nhạy cảm", "Chưa xác định" };
 }
 
 <section class="account-section profile-section">
@@ -54,14 +53,9 @@
                 </div>
 
                 <div class="mb-4">
-                    <label for="profileSkinType" class="form-label">Loại da</label>
-                    <select class="form-select" id="profileSkinType" name="SkinType">
-                        <option value="">Chọn loại da</option>
-                        @foreach (var s in skinTypes)
-                        {
-                            <option value="@s" @(Model.SkinType == s ? "selected" : "")>@s</option>
-                        }
-                    </select>
+                    <label for="profileAddress" class="form-label">Địa chỉ</label>
+                    <input type="text" class="form-control" id="profileAddress" name="Address"
+                           value="@Model.Address" maxlength="300" />
                 </div>
 
                 <button type="submit" class="btn btn-pink w-100">Lưu thông tin</button>

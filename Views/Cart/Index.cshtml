@@ -22,6 +22,7 @@
                          style="width:70px;height:70px;object-fit:contain;border:1px solid #EADCE2;border-radius:8px;padding:4px;background:#fff;" />
                     <div>
                         <strong class="d-block mb-1">@item.ProductName</strong>
+                        <small class="d-block text-muted">Phân loại: @item.DetailName</small>
                         <span class="text-muted">@item.Price.ToString("N0") ₫</span>
                         <small class="d-block text-muted">Còn @item.Stock sản phẩm</small>
                     </div>
@@ -31,7 +32,7 @@
                     @using (Html.BeginForm("Update", "Cart", FormMethod.Post, new { @class = "d-flex gap-2" }))
                     {
                         @Html.AntiForgeryToken()
-                        <input type="hidden" name="id" value="@item.ProductID" />
+                        <input type="hidden" name="id" value="@item.ProductDetailId" />
                         <input type="number" name="quantity" value="@item.Quantity"
                                min="1" max="@item.Stock" class="form-control form-control-sm" style="width:80px" />
                         <button type="submit" class="btn btn-outline-secondary btn-sm">Cập nhật</button>
@@ -42,7 +43,7 @@
                     @using (Html.BeginForm("Remove", "Cart", FormMethod.Post))
                     {
                         @Html.AntiForgeryToken()
-                        <input type="hidden" name="id" value="@item.ProductID" />
+                        <input type="hidden" name="id" value="@item.ProductDetailId" />
                         <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
                     }
                 </div>

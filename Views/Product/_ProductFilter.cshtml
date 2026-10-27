@@ -1,16 +1,10 @@
 ﻿@using System.Linq
+@using System.Collections.Generic
 
 @{
-    var skinTypes = new[]
-    {
-        new { Value = "oily",        Label = "Da dầu" },
-        new { Value = "dry",         Label = "Da khô" },
-        new { Value = "combination", Label = "Da hỗn hợp" },
-        new { Value = "sensitive",   Label = "Da nhạy cảm" }
-    };
-
+    var skinTypes = (ViewBag.SkinTypeOptions as IEnumerable<nv3.Models.SkinType>) ?? new nv3.Models.SkinType[0];
     // Value = tên thương hiệu viết thường, thay dấu cách bằng "-"
-    // (phải khớp với cách so sánh trong ProductController)
+    // (phải khớp với ProductHelper.ToSlug dùng trong ProductController)
     var brands = new[]
     {
         new { Value = "cerave",         Label = "CeraVe" },
@@ -21,7 +15,7 @@
         new { Value = "ysl",            Label = "YSL" }
     };
 
-    var selectedSkinTypes = (ViewBag.SelectedSkinTypes as string[]) ?? new string[0];
+    var selectedSkinTypes = (ViewBag.SelectedSkinTypes as int[]) ?? new int[0];
     var selectedBrands = (ViewBag.SelectedBrands as string[]) ?? new string[0];
 }
 
@@ -72,9 +66,9 @@
                 {
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox"
-                               name="skinTypes" value="@s.Value" id="skin-@s.Value"
-                               checked="@selectedSkinTypes.Contains(s.Value)" />
-                        <label class="form-check-label" for="skin-@s.Value">@s.Label</label>
+                               name="skinTypes" value="@s.SkinTypeId" id="skin-@s.SkinTypeId"
+                               checked="@selectedSkinTypes.Contains(s.SkinTypeId)" />
+                        <label class="form-check-label" for="skin-@s.SkinTypeId">@s.SkinTypeName</label>
                     </div>
                 }
             </fieldset>

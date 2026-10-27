@@ -15,7 +15,7 @@ namespace nv3.ViewModels
         public string ReceiverPhone { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập địa chỉ giao hàng.")]
-        [StringLength(255)]
+        [StringLength(150, ErrorMessage = "Địa chỉ tối đa 150 ký tự.")]
         public string ShippingAddress { get; set; }
 
         // Không lấy từ form, controller tự gán lại từ giỏ hàng

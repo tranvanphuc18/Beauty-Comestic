@@ -7,7 +7,7 @@
     int totalPages = ViewBag.TotalPages;
     string keyword = ViewBag.Keyword as string;
     string category = ViewBag.SelectedCategory as string;
-    string[] selSkin = (ViewBag.SelectedSkinTypes as string[]) ?? new string[0];
+    int[] selSkin = (ViewBag.SelectedSkinTypes as int[]) ?? new int[0];
     string[] selBrands = (ViewBag.SelectedBrands as string[]) ?? new string[0];
 
     // Tạo link chuyển trang nhưng vẫn giữ nguyên từ khóa + bộ lọc đang chọn
@@ -16,7 +16,7 @@
         var qs = new List<string>();
         if (!string.IsNullOrEmpty(keyword)) { qs.Add("keyword=" + HttpUtility.UrlEncode(keyword)); }
         if (!string.IsNullOrEmpty(category)) { qs.Add("category=" + HttpUtility.UrlEncode(category)); }
-        foreach (var s in selSkin) { qs.Add("skinTypes=" + HttpUtility.UrlEncode(s)); }
+        foreach (var s in selSkin) { qs.Add("skinTypes=" + s); }
         foreach (var b in selBrands) { qs.Add("brands=" + HttpUtility.UrlEncode(b)); }
         qs.Add("page=" + p);
         return Url.Action("Index", "Product") + "?" + string.Join("&", qs);
@@ -43,27 +43,17 @@
                 <div class="row g-4">
                     @foreach (var product in Model)
                     {
-                        var detail = product.ProductDetails == null
-                            ? null
-                            : product.ProductDetails
-                                .OrderBy(d => d.ProductDetailId)
-                                .FirstOrDefault();
-
-                        var price = detail == null
-                            ? 0m
-                            : (detail.DiscountedPrice.HasValue
-                                ? detail.DiscountedPrice.Value
-                                : detail.Price);
-
+                        var detail = nv3.Helpers.ProductHelper.FirstInStock(product);
+                        var price = nv3.Helpers.ProductHelper.DisplayPrice(product);
                         <div class="col-md-6 col-xl-4">
                             <div class="card product-card">
                                 <a class="product-media"
-                                   href="@Url.Action("Detail", "Product", new { id = product.ProductID })"
+                                   href="@Url.Action("Detail", "Product", new { id = product.ProductId })"
                                    tabindex="-1"
                                    aria-hidden="true">
                                     <img src="@Url.Content("~/Images/" + product.Image)"
                                          class="product-image"
-                                         alt="@product.ProductName"
+                                         alt="@product.Name"
                                          loading="lazy" />
                                 </a>
 
@@ -73,7 +63,7 @@
                                     </span>
 
                                     <h4 class="product-name">
-                                        <a href="@Url.Action("Detail", "Product", new { id = product.ProductID })">@product.ProductName</a>
+                                        <a href="@Url.Action("Detail", "Product", new { id = product.ProductId })">@product.Name</a>
                                     </h4>
 
                                     <p class="product-price">
@@ -83,15 +73,18 @@
 
                                     <div class="product-buttons">
                                         @Html.ActionLink("Xem chi tiết", "Detail", "Product",
-                                            new { id = product.ProductID }, new { @class = "btn btn-primary" })
+                                            new { id = product.ProductId }, new { @class = "btn btn-primary" })
 
-                                        @using (Html.BeginForm("Add", "Cart", FormMethod.Post, new { @class = "d-inline" }))
+                                        @if (detail != null)
                                         {
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="id" value="@product.ProductID" />
-                                            <input type="hidden" name="quantity" value="1" />
-                                            <input type="hidden" name="returnUrl" value="@Request.RawUrl" />
-                                            <button type="submit" class="btn btn-danger">Thêm vào giỏ hàng</button>
+                                            using (Html.BeginForm("Add", "Cart", FormMethod.Post, new { @class = "d-inline" }))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@detail.ProductDetailId" />
+                                                <input type="hidden" name="quantity" value="1" />
+                                                <input type="hidden" name="returnUrl" value="@Request.RawUrl" />
+                                                <button type="submit" class="btn btn-danger">Thêm vào giỏ hàng</button>
+                                            }
                                         }
                                     </div>
                                 </div>

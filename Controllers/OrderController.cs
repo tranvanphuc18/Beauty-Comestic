@@ -13,7 +13,13 @@ namespace nv3.Controllers
     [CustomerAuthorize]
     public class OrderController : Controller
     {
-        private BeautyCosmeticEntities db = new BeautyCosmeticEntities();
+        // Giá trị mặc định khi tạo đơn. Nếu database có CHECK constraint cho các cột này
+        // (OrderStatus / PaymentStatus / PaymentMethod) thì sửa lại cho đúng với script SQL của nhóm.
+        private const string DefaultOrderStatus = "Pending";
+        private const string DefaultPaymentStatus = "Unpaid";
+        private const string DefaultPaymentMethod = "COD";
+
+        private BeautyCosmeticDBEntities db = new BeautyCosmeticDBEntities();
 
         private int CurrentCustomerId
         {
@@ -31,11 +37,12 @@ namespace nv3.Controllers
                 return RedirectToAction("Index", "Cart");
             }
 
-            var customer = db.Customers.Find(CurrentCustomerId);
+            var user = db.Users.Find(CurrentCustomerId);
             var model = new CheckoutViewModel
             {
-                ReceiverName = customer.FullName,
-                ReceiverPhone = customer.Phone,
+                ReceiverName = user.FullName,
+                ReceiverPhone = user.Phone,
+                ShippingAddress = user.Address,
                 Items = cart
             };
             return View(model);
@@ -58,46 +65,54 @@ namespace nv3.Controllers
                 return View(model);
             }
 
-            // Lấy lại sản phẩm từ DB để kiểm tra tồn kho lần cuối
-            var ids = cart.Select(i => i.ProductID).ToList();
-            var products = db.Products.Where(p => ids.Contains(p.ProductID)).ToDictionary(p => p.ProductID);
+            // Lấy lại biến thể từ DB để kiểm tra tồn kho lần cuối
+            var ids = cart.Select(i => i.ProductDetailId).ToList();
+            var details = db.ProductDetails
+                            .Where(d => ids.Contains(d.ProductDetailId))
+                            .ToDictionary(d => d.ProductDetailId);
 
             foreach (var item in cart)
             {
-                Product p;
-                if (!products.TryGetValue(item.ProductID, out p) || p.Quantity < item.Quantity)
+                ProductDetail d;
+                if (!details.TryGetValue(item.ProductDetailId, out d) || d.Quantity < item.Quantity)
                 {
                     TempData["Error"] = "Sản phẩm \"" + item.ProductName + "\" không đủ hàng. Vui lòng kiểm tra lại giỏ.";
                     return RedirectToAction("Index", "Cart");
                 }
             }
 
-            // Tạo Order + OrderDetail, trừ tồn kho, cộng số lượng đã bán
+            // Bảng Orders không có cột tên/SĐT người nhận nên ghép vào ShippingAddress
+            string shipping = model.ReceiverName.Trim() + " - " + model.ReceiverPhone.Trim()
+                              + " - " + model.ShippingAddress.Trim();
+
             var order = new Order
             {
-                CustomerID = CurrentCustomerId,
+                UserId = CurrentCustomerId,
                 OrderDate = DateTime.Now,
-                PaymentStatus = "Chưa thanh toán",
-                ReceiverName = model.ReceiverName.Trim(),
-                ReceiverPhone = model.ReceiverPhone.Trim(),
-                ShippingAddress = model.ShippingAddress.Trim()
+                OrderStatus = DefaultOrderStatus,
+                PaymentMethod = DefaultPaymentMethod,
+                PaymentStatus = DefaultPaymentStatus,
+                ShippingAddress = shipping
             };
 
             decimal total = 0;
             foreach (var item in cart)
             {
-                var p = products[item.ProductID];
+                var d = details[item.ProductDetailId];
+                decimal unitPrice = ProductHelper.UnitPrice(d);
+                decimal lineTotal = unitPrice * item.Quantity;
 
                 order.OrderDetails.Add(new OrderDetail
                 {
-                    ProductID = p.ProductID,
+                    ProductDetailId = d.ProductDetailId,
                     Quantity = item.Quantity,
-                    UnitPrice = p.Price
+                    UnitPrice = unitPrice,
+                    LineTotal = lineTotal
                 });
 
-                p.Quantity -= item.Quantity;
-                p.SoldQuantity += item.Quantity;
-                total += p.Price * item.Quantity;
+                d.Quantity -= item.Quantity;
+                d.SoldQuantity += item.Quantity;
+                total += lineTotal;
             }
             order.TotalAmount = total;
 
@@ -105,7 +120,7 @@ namespace nv3.Controllers
             db.SaveChanges();   // một lần SaveChanges = một transaction: hoặc lưu hết, hoặc không lưu gì
 
             CartHelper.Clear();
-            return RedirectToAction("Success", new { id = order.OrderID });
+            return RedirectToAction("Success", new { id = order.OrderId });
         }
 
         public ActionResult Success(int id)
@@ -118,9 +133,9 @@ namespace nv3.Controllers
         // ---------- LỊCH SỬ GIAO DỊCH ----------
         public ActionResult History()
         {
-            int customerId = CurrentCustomerId;
+            int userId = CurrentCustomerId;
             var orders = db.Orders
-                .Where(o => o.CustomerID == customerId)
+                .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.OrderDate)
                 .ToList();
             return View(orders);
@@ -144,36 +159,30 @@ namespace nv3.Controllers
             var cart = CartHelper.GetCart();
             var skipped = new List<string>();
 
-            foreach (var d in order.OrderDetails)
+            foreach (var line in order.OrderDetails)
             {
-                var p = d.Product;
-                if (p == null || p.Quantity <= 0)
+                var d = line.ProductDetail;
+                string name = d == null ? "(sản phẩm đã bị xóa)" : d.Product.Name + " (" + d.DetailName + ")";
+
+                if (d == null || d.Quantity <= 0)
                 {
-                    skipped.Add(p == null ? "(sản phẩm đã bị xóa)" : p.ProductName);
+                    skipped.Add(name);
                     continue;
                 }
 
-                var item = cart.FirstOrDefault(i => i.ProductID == p.ProductID);
+                var item = cart.FirstOrDefault(i => i.ProductDetailId == d.ProductDetailId);
                 int current = item == null ? 0 : item.Quantity;
-                int canAdd = Math.Min(d.Quantity, p.Quantity - current);
+                int canAdd = Math.Min(line.Quantity, d.Quantity - current);
 
                 if (canAdd <= 0)
                 {
-                    skipped.Add(p.ProductName);
+                    skipped.Add(name);
                     continue;
                 }
 
                 if (item == null)
                 {
-                    cart.Add(new CartItem
-                    {
-                        ProductID = p.ProductID,
-                        ProductName = p.ProductName,
-                        Image = p.Image,
-                        Price = p.Price,
-                        Quantity = canAdd,
-                        Stock = p.Quantity
-                    });
+                    cart.Add(CartHelper.ToCartItem(d, canAdd));
                 }
                 else
                 {
@@ -195,10 +204,10 @@ namespace nv3.Controllers
         // Chỉ trả về đơn nếu đúng là của khách đang đăng nhập
         private Order GetOwnOrder(int id)
         {
-            int customerId = CurrentCustomerId;
+            int userId = CurrentCustomerId;
             return db.Orders
-                .Include(o => o.OrderDetails.Select(d => d.Product))
-                .FirstOrDefault(o => o.OrderID == id && o.CustomerID == customerId);
+                .Include(o => o.OrderDetails.Select(d => d.ProductDetail.Product))
+                .FirstOrDefault(o => o.OrderId == id && o.UserId == userId);
         }
 
         protected override void Dispose(bool disposing)

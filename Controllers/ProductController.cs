@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
+using nv3.Helpers;
 using nv3.Models;
 
 namespace nv3.Controllers
@@ -9,45 +12,57 @@ namespace nv3.Controllers
     public class ProductController : Controller
     {
         private const int PageSize = 9;
-        private BeautyCosmeticEntities db = new BeautyCosmeticEntities();
+        private BeautyCosmeticDBEntities db = new BeautyCosmeticDBEntities();
 
-        public ActionResult Index(string keyword, string category, string[] skinTypes, string[] brands, int page = 1)
+        public ActionResult Index(string keyword, string category, int[] skinTypes, string[] brands, int page = 1)
         {
-            skinTypes = skinTypes ?? new string[0];
+            skinTypes = skinTypes ?? new int[0];
             brands = brands ?? new string[0];
             if (page < 1) page = 1;
 
-            // 1) Chỉ lấy sản phẩm còn hàng
-            var query = db.Products.Where(p => p.Quantity > 0);
+            // 1) Chỉ lấy sản phẩm còn hàng (có ít nhất 1 biến thể còn tồn kho)
+            var query = db.Products
+                .Include(p => p.ProductDetails)
+                .Where(p => p.ProductDetails.Any(d => d.Quantity > 0));
 
             // 2) Tìm kiếm theo tên, thương hiệu, mô tả
             if (!string.IsNullOrWhiteSpace(keyword))
             {
                 string kw = keyword.Trim();
-                query = query.Where(p => p.ProductName.Contains(kw)
+                query = query.Where(p => p.Name.Contains(kw)
                                       || p.Brand.Contains(kw)
                                       || p.Description.Contains(kw));
             }
 
-            // 3) Lọc theo danh mục (slug)
+            // 3) Lọc theo danh mục: bảng Categories không có cột Slug nên so khớp slug của CategoryName
             if (!string.IsNullOrEmpty(category))
             {
-                query = query.Where(p => p.Category.Slug == category);
+                var cat = db.Categories.ToList()
+                            .FirstOrDefault(c => ProductHelper.ToSlug(c.CategoryName) == category);
+                if (cat == null)
+                {
+                    query = query.Where(p => false);
+                }
+                else
+                {
+                    int catId = cat.CategoryId;
+                    query = query.Where(p => p.CategoryId == catId);
+                }
             }
 
-            var list = query.OrderBy(p => p.ProductID).ToList();
-
-            // 4) Lọc loại da (SkinTypes lưu dạng "oily,dry") - lọc trong bộ nhớ cho đơn giản
+            // 4) Lọc loại da (quan hệ nhiều-nhiều Product - SkinType)
             if (skinTypes.Length > 0)
             {
-                list = list.Where(p => !string.IsNullOrEmpty(p.SkinTypes)
-                    && p.SkinTypes.Split(',').Select(s => s.Trim()).Intersect(skinTypes).Any()).ToList();
+                var skinIds = skinTypes.ToList();
+                query = query.Where(p => p.SkinTypes.Any(s => skinIds.Contains(s.SkinTypeId)));
             }
 
-            // 5) Lọc thương hiệu (value trong filter = tên viết thường, thay dấu cách bằng "-")
+            var list = query.OrderBy(p => p.ProductId).ToList();
+
+            // 5) Lọc thương hiệu (value trong filter = slug của tên thương hiệu)
             if (brands.Length > 0)
             {
-                list = list.Where(p => brands.Contains(p.Brand.ToLower().Replace(" ", "-"))).ToList();
+                list = list.Where(p => brands.Contains(ProductHelper.ToSlug(p.Brand))).ToList();
             }
 
             // 6) Phân trang
@@ -59,6 +74,7 @@ namespace nv3.Controllers
             var items = list.Skip((page - 1) * PageSize).Take(PageSize).ToList();
 
             ViewBag.Keyword = keyword;
+            ViewBag.SkinTypeOptions = db.SkinTypes.OrderBy(s => s.SkinTypeId).ToList();
             ViewBag.SelectedSkinTypes = skinTypes;
             ViewBag.SelectedBrands = brands;
             ViewBag.SelectedCategory = category;
@@ -76,7 +92,10 @@ namespace nv3.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            var product = db.Products.Find(id);
+            var product = db.Products
+                .Include(p => p.ProductDetails)
+                .Include(p => p.Category)
+                .FirstOrDefault(p => p.ProductId == id.Value);
             if (product == null)
             {
                 return HttpNotFound();
