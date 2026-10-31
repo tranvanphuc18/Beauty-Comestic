@@ -1,0 +1,67 @@
+﻿@model IEnumerable<nv3.Models.ProductDetail>
+@{
+    ViewBag.Title = "Quản lý tồn kho";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card p-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="m-0 text-primary">Tình trạng tồn kho theo Checklist</h4>
+        <div>
+            <span class="badge badge-danger p-2 mr-1">Cần nhập gấp (<= 5)</span>
+            <span class="badge badge-warning p-2 mr-1">Sắp hết (<= 20)</span>
+            <span class="badge badge-success p-2">Còn hàng (> 20)</span>
+        </div>
+    </div>
+
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th>#</th>
+                <th>Sản phẩm</th>
+                <th>Phân loại / Chi tiết</th>
+                <th>Giá bán</th>
+                <th>Số lượng tồn</th>
+                <th>Đã bán</th>
+                <th>Đánh giá trạng thái</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{ int stt = 1; }
+            @foreach (var item in Model)
+            {
+                string rowClass = "";
+                if (item.Quantity == 0) { rowClass = "table-danger font-weight-bold"; }
+                else if (item.Quantity <= 5) { rowClass = "table-danger"; }
+                else if (item.Quantity <= 20) { rowClass = "table-warning"; }
+
+                <tr class="@rowClass">
+                    <td>@stt++</td>
+                    <td><strong>@(item.Product != null ? item.Product.Name : "N/A")</strong></td>
+                    <td>@item.DetailName</td>
+                    <td>@string.Format("{0:N0} đ", item.Price)</td>
+                    <td><strong>@item.Quantity</strong></td>
+                    <td>@item.SoldQuantity</td>
+                    <td>
+                        @if (item.Quantity == 0)
+                        {
+                            <span class="badge badge-danger">Hết hàng!</span>
+                        }
+                        else if (item.Quantity <= 5)
+                        {
+                            <span class="badge badge-danger">CẦN NHẬP THÊM GẤP</span>
+                        }
+                        else if (item.Quantity <= 20)
+                        {
+                            <span class="badge badge-warning">Sắp hết hàng</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-success">Còn hàng an toàn</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

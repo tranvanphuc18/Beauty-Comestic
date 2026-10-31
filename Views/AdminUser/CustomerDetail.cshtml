@@ -1,0 +1,64 @@
+﻿@model nv3.Models.User
+@{
+    ViewBag.Title = "Chi tiết khách hàng: " + Model.FullName;
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Hồ sơ khách hàng #@Model.UserId</h4>
+        <a href="@Url.Action("Customers")" class="btn btn-outline-secondary">Quay lại danh sách</a>
+    </div>
+    <hr />
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <p><strong>Họ và tên:</strong> @Model.FullName</p>
+            <p><strong>Email:</strong> @Model.Email</p>
+            <p><strong>Số điện thoại:</strong> @Model.Phone</p>
+        </div>
+        <div class="col-md-6">
+            <p><strong>Địa chỉ:</strong> @Model.Address</p>
+            <p><strong>Ngày đăng ký:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+            <p><strong>Vai trò:</strong> <span class="badge badge-success">@Model.Role</span></p>
+        </div>
+    </div>
+
+    <h5 class="text-primary mt-3">Lịch sử đơn hàng của khách hàng này</h5>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th>Mã đơn</th>
+                <th>Ngày đặt</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái đơn</th>
+                <th>Thanh toán</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Orders != null && Model.Orders.Any())
+            {
+                foreach (var o in Model.Orders.OrderByDescending(x => x.OrderDate))
+                {
+                    <tr>
+                        <td>#@o.OrderId</td>
+                        <td>@o.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="text-danger font-weight-bold">@string.Format("{0:N0} đ", o.TotalAmount)</td>
+                        <td><span class="badge badge-info">@o.OrderStatus</span></td>
+                        <td><span class="badge badge-secondary">@o.PaymentStatus</span></td>
+                        <td>
+                            <a href="@Url.Action("Detail", "AdminOrder", new { id = o.OrderId })" class="btn btn-sm btn-info">
+                                Xem đơn hàng
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="6" class="text-center text-muted">Khách hàng này chưa phát sinh đơn hàng nào.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

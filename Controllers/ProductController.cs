@@ -89,17 +89,15 @@ namespace nv3.Controllers
         {
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return HttpNotFound();
             }
 
-            var product = db.Products
-                .Include(p => p.ProductDetails)
-                .Include(p => p.Category)
-                .FirstOrDefault(p => p.ProductId == id.Value);
+            var product = db.Products.Find(id);
             if (product == null)
             {
                 return HttpNotFound();
             }
+
             return View(product);
         }
 
@@ -108,5 +106,7 @@ namespace nv3.Controllers
             if (disposing) db.Dispose();
             base.Dispose(disposing);
         }
+      
     }
-}
+   
+    }

@@ -1,0 +1,78 @@
+﻿@model IEnumerable<nv3.Models.Product>
+@{
+    ViewBag.Title = "Quản lý sản phẩm";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card p-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="m-0 text-primary">Danh sách sản phẩm</h4>
+        <a href="@Url.Action("Create")" class="btn btn-success">
+            <i class="fas fa-plus"></i> Thêm sản phẩm mới
+        </a>
+    </div>
+
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th style="width: 50px;">#</th>
+                <th style="width: 80px;">Ảnh</th>
+                <th>Tên sản phẩm</th>
+                <th>Thương hiệu</th>
+                <th>Danh mục</th>
+                <th>Giá bán</th>
+                <th>Tồn kho</th>
+                <th style="width: 150px;">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{ int stt = 1; }
+            @foreach (var item in Model)
+            {
+                var firstDetail = item.ProductDetails != null ? item.ProductDetails.FirstOrDefault() : null;
+                int totalStock = item.ProductDetails != null ? item.ProductDetails.Sum(d => d.Quantity) : 0;
+                <tr>
+                    <td>@stt++</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.Image))
+                        {
+                            <img src="@Url.Content("~/Content/Uploads/Products/" + item.Image)"
+                                 onerror="this.src='https://via.placeholder.com/60';" width="60" height="60" style="object-fit:cover; border-radius:4px;" />
+                        }
+                    </td>
+                    <td><strong>@item.Name</strong></td>
+                    <td>@item.Brand</td>
+                    <td>@(item.Category != null ? item.Category.CategoryName : "N/A")</td>
+                    <td>
+                        @(firstDetail != null ? string.Format("{0:N0} đ", firstDetail.Price) : "Chưa có giá")
+                    </td>
+                    <td>
+                        @if (totalStock == 0)
+                        {
+                            <span class="badge badge-danger">Hết hàng</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-success">@totalStock</span>
+                        }
+                    </td>
+                    <td>
+                        <a href="@Url.Action("Detail", new { id = item.ProductId })" class="btn btn-sm btn-info" title="Xem chi tiết">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="@Url.Action("Edit", new { id = item.ProductId })" class="btn btn-sm btn-warning" title="Chỉnh sửa">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        @using (Html.BeginForm("Delete", "AdminProduct", new { id = item.ProductId }, FormMethod.Post, new { style = "display:inline;" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn chắc chắn muốn xóa sản phẩm này?');" title="Xóa">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

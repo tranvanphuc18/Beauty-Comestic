@@ -1,0 +1,49 @@
+﻿@model IEnumerable<nv3.Models.User>
+@{
+    ViewBag.Title = "Tài khoản Quản trị viên";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card p-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="m-0 text-primary">Danh sách tài khoản Admin</h4>
+        <a href="@Url.Action("Create")" class="btn btn-success">
+            <i class="fas fa-user-plus mr-1"></i> Thêm Admin
+        </a>
+    </div>
+
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th>#</th>
+                <th>Họ tên</th>
+                <th>Email đăng nhập</th>
+                <th>Số điện thoại</th>
+                <th>Ngày tạo</th>
+                <th style="width: 100px;">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{ int stt = 1; }
+            @foreach (var u in Model)
+            {
+                <tr>
+                    <td>@stt++</td>
+                    <td><strong>@u.FullName</strong></td>
+                    <td>@u.Email</td>
+                    <td>@u.Phone</td>
+                    <td>@u.CreatedAt.ToString("dd/MM/yyyy")</td>
+                    <td>
+                        @using (Html.BeginForm("Delete", "AdminUser", new { id = u.UserId }, FormMethod.Post))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-danger btn-block" onclick="return confirm('Bạn chắc chắn muốn xóa quyền Admin của tài khoản này?');">
+                                <i class="fas fa-trash mr-1"></i> Xóa
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

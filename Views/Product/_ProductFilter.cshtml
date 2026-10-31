@@ -3,8 +3,6 @@
 
 @{
     var skinTypes = (ViewBag.SkinTypeOptions as IEnumerable<nv3.Models.SkinType>) ?? new nv3.Models.SkinType[0];
-    // Value = tên thương hiệu viết thường, thay dấu cách bằng "-"
-    // (phải khớp với ProductHelper.ToSlug dùng trong ProductController)
     var brands = new[]
     {
         new { Value = "cerave",         Label = "CeraVe" },
@@ -44,9 +42,7 @@
     </div>
 
     <div class="offcanvas-body">
-        @using (Html.BeginForm("Index", "Product", FormMethod.Get,
-            new { id = "product-filter-form", @class = "product-filter__form w-100", novalidate = "novalidate" }))
-        {
+        <form action="@Url.Action("Index", "Product")" method="get" id="product-filter-form" class="product-filter__form w-100" novalidate="novalidate">
             <h2 class="product-filter__heading h5 d-none d-lg-block">Bộ lọc sản phẩm</h2>
 
             @if (!string.IsNullOrEmpty(ViewBag.Keyword as string))
@@ -67,7 +63,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox"
                                name="skinTypes" value="@s.SkinTypeId" id="skin-@s.SkinTypeId"
-                               checked="@selectedSkinTypes.Contains(s.SkinTypeId)" />
+                               @(selectedSkinTypes.Contains(s.SkinTypeId) ? "checked" : "") />
                         <label class="form-check-label" for="skin-@s.SkinTypeId">@s.SkinTypeName</label>
                     </div>
                 }
@@ -81,7 +77,7 @@
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox"
                                    name="brands" value="@b.Value" id="brand-@b.Value"
-                                   checked="@selectedBrands.Contains(b.Value)" />
+                                   @(selectedBrands.Contains(b.Value) ? "checked" : "") />
                             <label class="form-check-label" for="brand-@b.Value">@b.Label</label>
                         </div>
                     }
@@ -92,7 +88,7 @@
                 <button type="submit" class="btn btn-primary">Áp dụng bộ lọc</button>
                 <a href="@Url.Action("Index", "Product")" class="btn btn-outline-secondary">Xóa bộ lọc</a>
             </div>
-        }
+        </form>
     </div>
 </aside>
 
