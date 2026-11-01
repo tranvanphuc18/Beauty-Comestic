@@ -230,6 +230,7 @@
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\product-filter.js" />
     <Content Include="Scripts\site.js" />
+    <Content Include="SQLQuery3.sql" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

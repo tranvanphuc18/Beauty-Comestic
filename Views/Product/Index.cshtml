@@ -10,7 +10,6 @@
     int[] selSkin = (ViewBag.SelectedSkinTypes as int[]) ?? new int[0];
     string[] selBrands = (ViewBag.SelectedBrands as string[]) ?? new string[0];
 
-    // Tạo link chuyển trang nhưng vẫn giữ nguyên từ khóa + bộ lọc đang chọn
     Func<int, string> pageUrl = p =>
     {
         var qs = new List<string>();
