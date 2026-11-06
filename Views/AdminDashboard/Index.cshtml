@@ -1,0 +1,134 @@
+﻿@{
+    ViewBag.Title = "Dashboard - Tổng quan";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    decimal totalRevenue = ViewBag.TotalRevenue;
+    int totalProducts = ViewBag.TotalProducts;
+    int totalCategories = ViewBag.TotalCategories;
+    int totalCustomers = ViewBag.TotalCustomers;
+    int totalOrders = ViewBag.TotalOrders;
+    int pendingOrders = ViewBag.PendingOrders;
+
+    var recentOrders = ViewBag.RecentOrders as List<nv3.Models.Order>;
+    var lowStockItems = ViewBag.LowStockItems as List<nv3.Models.ProductDetail>;
+}
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-primary h-100">
+            <div class="card-body">
+                <h5><i class="fas fa-dollar-sign"></i> Doanh thu</h5>
+                <h3>@string.Format("{0:N0} đ", totalRevenue)</h3>
+                <small>Tổng đơn đã hoàn thành</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-success h-100">
+            <div class="card-body">
+                <h5><i class="fas fa-receipt"></i> Đơn hàng</h5>
+                <h3>@totalOrders</h3>
+                <small class="text-warning font-weight-bold">@pendingOrders đơn chờ duyệt</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-info h-100">
+            <div class="card-body">
+                <h5><i class="fas fa-box"></i> Sản phẩm</h5>
+                <h3>@totalProducts</h3>
+                <small>@totalCategories danh mục</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-warning h-100">
+            <div class="card-body">
+                <h5><i class="fas fa-users"></i> Khách hàng</h5>
+                <h3>@totalCustomers</h3>
+                <small>Tài khoản đã đăng ký</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-7 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">5 Đơn hàng mới nhất</h6>
+                <a href="@Url.Action("Index", "AdminOrder")" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-bordered mb-0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (recentOrders != null)
+                        {
+                            foreach (var o in recentOrders)
+                            {
+                                <tr>
+                                    <td><a href="@Url.Action("Detail","AdminOrder",new{id=o.OrderId})">#@o.OrderId</a></td>
+                                    <td>@(o.User != null ? o.User.FullName : "N/A")</td>
+                                    <td class="text-danger font-weight-bold">@string.Format("{0:N0} đ", o.TotalAmount)</td>
+                                    <td><span class="badge badge-info">@o.OrderStatus</span></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-danger">⚠️ Hàng sắp hết kho</h6>
+                <a href="@Url.Action("Inventory","AdminProduct")" class="btn btn-sm btn-outline-danger">Xem kho</a>
+            </div>
+            <div class="card-body p-0">
+                @if (lowStockItems != null && lowStockItems.Count > 0)
+                {
+                    <table class="table table-bordered mb-0">
+                        <thead class="thead-light">
+                            <tr><th>Sản phẩm</th><th>Còn lại</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in lowStockItems)
+                            {
+                                <tr class="@(item.Quantity == 0 ? "table-danger" : "table-warning")">
+                                    <td>
+                                        <strong>@(item.Product != null ? item.Product.Name : "N/A")</strong><br />
+                                        <small class="text-muted">@item.DetailName</small>
+                                    </td>
+                                    <td>
+                                        @if (item.Quantity == 0)
+                                        {
+                                            <span class="badge badge-danger">Hết hàng</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-warning">@item.Quantity</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-success text-center py-3 mb-0">✅ Tất cả hàng đều đầy đủ!</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

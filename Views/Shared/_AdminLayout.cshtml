@@ -83,6 +83,11 @@
         </div>
         <ul class="nav">
             <li>
+                <a href="@Url.Action("Index", "AdminDashboard")" class="@(ViewContext.RouteData.Values["controller"].ToString() == "AdminDashboard" ? "active" : "")">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li>
                 <a href="@Url.Action("Index", "AdminCategory")" class="@(ViewContext.RouteData.Values["controller"].ToString() == "AdminCategory" ? "active" : "")">
                     <i class="fas fa-tags"></i> Quản lý danh mục
                 </a>

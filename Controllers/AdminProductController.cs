@@ -152,7 +152,15 @@ namespace nv3.Controllers
                     TempData["Error"] = "Không thể xóa sản phẩm này vì đã phát sinh trong đơn hàng của khách!";
                     return RedirectToAction("Index");
                 }
-
+                // Xóa file ảnh vật lý nếu có (và không phải ảnh mặc định)
+                if (!string.IsNullOrEmpty(product.Image) && product.Image != "no-image.png")
+                {
+                    string imgPath = Server.MapPath("~/Content/Uploads/Products/" + product.Image);
+                    if (System.IO.File.Exists(imgPath))
+                    {
+                        System.IO.File.Delete(imgPath);
+                    }
+                }
                 // Xóa các chi tiết sản phẩm liên quan
                 db.ProductDetails.RemoveRange(product.ProductDetails);
                 db.Products.Remove(product);
@@ -186,6 +194,28 @@ namespace nv3.Controllers
                               .ToList();
             return View(inventory);
         }
+        // Nhập thêm hàng vào kho
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult UpdateStock(int productDetailId, int addQuantity)
+        {
+            if (!CheckAdmin()) return RedirectToAction("Login", "Account");
+
+            if (addQuantity <= 0)
+            {
+                TempData["Error"] = "Số lượng nhập thêm phải lớn hơn 0.";
+                return RedirectToAction("Inventory");
+            }
+
+            var detail = db.ProductDetails.Find(productDetailId);
+            if (detail == null) return HttpNotFound();
+
+            detail.Quantity += addQuantity;
+            db.SaveChanges();
+            TempData["Success"] = "Đã nhập thêm " + addQuantity + " sản phẩm. Tồn kho hiện tại: " + detail.Quantity + ".";
+            return RedirectToAction("Inventory");
+        }
+
 
         protected override void Dispose(bool disposing)
         {
