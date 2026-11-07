@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -20,10 +20,9 @@ namespace nv3.Controllers
             brands = brands ?? new string[0];
             if (page < 1) page = 1;
 
-            // 1) Chỉ lấy sản phẩm còn hàng (có ít nhất 1 biến thể còn tồn kho)
+            // 1) Lấy tất cả sản phẩm (bao gồm cả sản phẩm hết hàng để hiển thị giống Shopee)
             var query = db.Products
-                .Include(p => p.ProductDetails)
-                .Where(p => p.ProductDetails.Any(d => d.Quantity > 0));
+                .Include(p => p.ProductDetails);
 
             // 2) Tìm kiếm theo tên, thương hiệu, mô tả
             if (!string.IsNullOrWhiteSpace(keyword))
@@ -106,7 +105,5 @@ namespace nv3.Controllers
             if (disposing) db.Dispose();
             base.Dispose(disposing);
         }
-      
     }
-   
-    }
+}

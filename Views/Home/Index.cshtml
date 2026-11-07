@@ -1,235 +1,249 @@
-﻿@model nv3.ViewModels.HomeViewModel
-@{
-    ViewBag.Title = "Trang chủ";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
-
-<section class="home-hero">
-    <div class="container">
-        <div class="hero-panel">
-            <div class="hero-content">
-                <span class="hero-eyebrow">
-                    BEAUTY STARTS WITH YOU
-                </span>
-
-                <h1>
-                    Dịu dàng chăm sóc.
-                    <span>Rạng rỡ theo cách riêng.</span>
-                </h1>
-
-                <p>
-                    Khám phá những sản phẩm chăm sóc da và làm đẹp
-                    giúp bạn yêu chiều bản thân mỗi ngày.
-                </p>
-
-                <div class="hero-actions">
-                    <a href="@Url.Action("Index", "Product")"
-                       class="btn-pink">
-                        Khám phá sản phẩm
-                        <span aria-hidden="true">→</span>
-                    </a>
-
-                    <a href="#home-categories" class="hero-secondary-link">
-                        Khám phá danh mục
-                    </a>
-                </div>
-
-                <div class="hero-trust">
-                    <span class="trust-check">✓</span>
-                    Gợi ý làm đẹp dành cho bạn
-                </div>
-            </div>
-
-            <div class="hero-visual">
-                <div class="hero-image-frame">
-                    <img src="https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=1000&q=85"
-                         alt="Sản phẩm chăm sóc da và làm đẹp"
-                         fetchpriority="high" />
-                </div>
-
-                <div class="hero-floating-note">
-                    <span class="floating-heart">♡</span>
-                    <div>
-                        <strong>Love your skin</strong>
-                        <small>Yêu chiều làn da mỗi ngày</small>
-                    </div>
-                </div>
-
-                <div class="hero-decoration hero-decoration-one"></div>
-                <div class="hero-decoration hero-decoration-two"></div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="home-benefits">
-    <div class="container">
-        <div class="row g-3">
-            <div class="col-6 col-lg-3">
-                <div class="benefit-item">
-                    <span class="benefit-icon">♡</span>
-                    <div>
-                        <strong>Chăm sóc tận tâm</strong>
-                        <small>Quan tâm đến nhu cầu của bạn</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-6 col-lg-3">
-                <div class="benefit-item">
-                    <span class="benefit-icon">✧</span>
-                    <div>
-                        <strong>Đa dạng lựa chọn</strong>
-                        <small>Nhiều dòng mỹ phẩm</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-6 col-lg-3">
-                <div class="benefit-item">
-                    <span class="benefit-icon">♡</span>
-                    <div>
-                        <strong>Ưu tiên trải nghiệm</strong>
-                        <small>Mua sắm dễ dàng, thuận tiện</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-6 col-lg-3">
-                <div class="benefit-item">
-                    <span class="benefit-icon">✿</span>
-                    <div>
-                        <strong>Vẻ đẹp riêng bạn</strong>
-                        <small>Tự tin theo cách của mình</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="home-section" id="home-categories">
-    <div class="container">
-        <div class="section-topline">
-            <div>
-                <span class="section-eyebrow">FIND YOUR BEAUTY</span>
-                <h2 class="section-heading">Khám phá danh mục</h2>
-                <p class="section-subtitle">
-                    Bắt đầu hành trình chăm sóc bản thân từ những điều phù hợp nhất.
-                </p>
-            </div>
-
-            <a href="@Url.Action("Index", "Product")"
-               class="section-more">
-                Xem tất cả <span aria-hidden="true">→</span>
-            </a>
-        </div>
-
-        @{
-            var catMeta = new Dictionary<string, string[]>
-            {
-                { "cham-soc-da", new[] { "https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=650&q=80", "category-image-skincare", "Làm sạch và nuôi dưỡng" } },
-                { "trang-diem",  new[] { "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=650&q=80", "category-image-makeup", "Tôn lên nét đẹp riêng" } },
-                { "chong-nang",  new[] { "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=650&q=80", "category-image-sunscreen", "Bảo vệ da mỗi ngày" } },
-                { "duong-am",    new[] { "https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=650&q=80", "category-image-moisturizer", "Cho làn da mềm mịn" } }
-            };
-        }
-        <div class="row g-3 g-md-4">
-            @foreach (var c in Model.Categories)
-            {
-                string slug = nv3.Helpers.ProductHelper.ToSlug(c.CategoryName);
-                var meta = catMeta.ContainsKey(slug) ? catMeta[slug] : catMeta["cham-soc-da"];
-                <div class="col-6 col-lg-3">
-                    <a class="category-card"
-                       href="@Url.Action("Index", "Product", new { category = slug })">
-                        <div class="category-image @meta[1]">
-                            <img src="@meta[0]" alt="Danh mục @c.CategoryName" loading="lazy" />
-                            <span class="category-arrow" aria-hidden="true">↗</span>
-                        </div>
-                        <div class="category-info">
-                            <h3>@c.CategoryName</h3>
-                            <p>@meta[2]</p>
-                        </div>
-                    </a>
-                </div>
-            }
-        </div>
-    </div>
-</section>
-
-<section class="home-section featured-section" id="featured-products">
-    <div class="container">
-        <div class="section-topline">
-            <div>
-                <span class="section-eyebrow">YOUR BEAUTY PICKS</span>
-                <h2 class="section-heading">Gợi ý dành cho bạn</h2>
-                <p class="section-subtitle">
-                    Một vài lựa chọn nổi bật để bạn bắt đầu khám phá.
-                </p>
-            </div>
-
-            <a href="@Url.Action("Index", "Product")"
-               class="section-more">
-                Tất cả sản phẩm <span aria-hidden="true">→</span>
-            </a>
-        </div>
-
-        <div class="row g-3 g-md-4">
-            @foreach (var p in Model.FeaturedProducts)
-            {
-                <div class="col-6 col-lg-3">
-                    <article class="home-product-card">
-                        <a class="home-product-image"
-                           href="@Url.Action("Detail", "Product", new { id = p.ProductId })"
-                           aria-label="Xem @p.Name">
-                            <img src="@Url.Content("~/Images/" + p.Image)"
-                                 alt="@p.Name"
-                                 loading="lazy" />
-                        </a>
-                        <div class="home-product-info">
-                            <span class="product-brand">@p.Brand</span>
-                            <h3>
-                                <a href="@Url.Action("Detail", "Product", new { id = p.ProductId })">@p.Name</a>
-                            </h3>
-                            <p class="product-description">@nv3.Helpers.ProductHelper.DisplayPrice(p).ToString("N0") VNĐ</p>
-                            <a class="product-view-link"
-                               href="@Url.Action("Detail", "Product", new { id = p.ProductId })">
-                                Xem sản phẩm <span aria-hidden="true">→</span>
-                            </a>
-                        </div>
-                    </article>
-                </div>
-            }
-        </div>
-    </div>
-</section>
-
-<section class="home-about">
-    <div class="container">
-        <div class="about-panel">
-            <div class="about-decoration" aria-hidden="true">♡</div>
-
-            <div class="about-content">
-                <span class="section-eyebrow">A LITTLE SELF-CARE</span>
-                <h2>
-                    Dành một chút yêu thương
-                    <span>cho chính mình.</span>
-                </h2>
-                <p>
-                    Làm đẹp không phải để trở thành một ai khác.
-                    Đó là cách bạn chăm sóc bản thân và tự tin hơn mỗi ngày.
-                </p>
-                <a href="@Url.Action("Index", "Product")"
-                   class="btn-pink">
-                    Tìm sản phẩm phù hợp <span aria-hidden="true">→</span>
-                </a>
-            </div>
-
-            <div class="about-image">
-                <img src="https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?auto=format&fit=crop&w=900&q=80"
-                     alt="Không gian chăm sóc sắc đẹp"
-                     loading="lazy" />
-            </div>
-        </div>
-    </div>
+﻿@model nv3.ViewModels.HomeViewModel
+@{
+    ViewBag.Title = "Trang chủ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="home-hero">
+    <div class="container">
+        <div class="hero-panel">
+            <div class="hero-content">
+                <span class="hero-eyebrow">
+                    BEAUTY STARTS WITH YOU
+                </span>
+
+                <h1>
+                    Dịu dàng chăm sóc.
+                    <span>Rạng rỡ theo cách riêng.</span>
+                </h1>
+
+                <p>
+                    Khám phá những sản phẩm chăm sóc da và làm đẹp
+                    giúp bạn yêu chiều bản thân mỗi ngày.
+                </p>
+
+                <div class="hero-actions">
+                    <a href="@Url.Action("Index", "Product")"
+                       class="btn-pink">
+                        Khám phá sản phẩm
+                        <span aria-hidden="true">→</span>
+                    </a>
+
+                    <a href="#home-categories" class="hero-secondary-link">
+                        Khám phá danh mục
+                    </a>
+                </div>
+
+                <div class="hero-trust">
+                    <span class="trust-check">✓</span>
+                    Gợi ý làm đẹp dành cho bạn
+                </div>
+            </div>
+
+            <div class="hero-visual">
+                <div class="hero-image-frame">
+                    <img src="https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=1000&q=85"
+                         alt="Sản phẩm chăm sóc da và làm đẹp"
+                         fetchpriority="high" />
+                </div>
+
+                <div class="hero-floating-note">
+                    <span class="floating-heart">♡</span>
+                    <div>
+                        <strong>Love your skin</strong>
+                        <small>Yêu chiều làn da mỗi ngày</small>
+                    </div>
+                </div>
+
+                <div class="hero-decoration hero-decoration-one"></div>
+                <div class="hero-decoration hero-decoration-two"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="home-benefits">
+    <div class="container">
+        <div class="row g-3">
+            <div class="col-6 col-lg-3">
+                <div class="benefit-item">
+                    <span class="benefit-icon">♡</span>
+                    <div>
+                        <strong>Chăm sóc tận tâm</strong>
+                        <small>Quan tâm đến nhu cầu của bạn</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <div class="benefit-item">
+                    <span class="benefit-icon">✧</span>
+                    <div>
+                        <strong>Đa dạng lựa chọn</strong>
+                        <small>Nhiều dòng mỹ phẩm</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <div class="benefit-item">
+                    <span class="benefit-icon">♡</span>
+                    <div>
+                        <strong>Ưu tiên trải nghiệm</strong>
+                        <small>Mua sắm dễ dàng, thuận tiện</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <div class="benefit-item">
+                    <span class="benefit-icon">✿</span>
+                    <div>
+                        <strong>Vẻ đẹp riêng bạn</strong>
+                        <small>Tự tin theo cách của mình</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="home-section" id="home-categories">
+    <div class="container">
+        <div class="section-topline">
+            <div>
+                <span class="section-eyebrow">FIND YOUR BEAUTY</span>
+                <h2 class="section-heading">Khám phá danh mục</h2>
+                <p class="section-subtitle">
+                    Bắt đầu hành trình chăm sóc bản thân từ những điều phù hợp nhất.
+                </p>
+            </div>
+
+            <a href="@Url.Action("Index", "Product")"
+               class="section-more">
+                Xem tất cả <span aria-hidden="true">→</span>
+            </a>
+        </div>
+
+        @{
+            var catMeta = new Dictionary<string, string[]>
+            {
+                { "cham-soc-da", new[] { "https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=650&q=80", "category-image-skincare", "Làm sạch và nuôi dưỡng" } },
+                { "trang-diem",  new[] { "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=650&q=80", "category-image-makeup", "Tôn lên nét đẹp riêng" } },
+                { "chong-nang",  new[] { "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=650&q=80", "category-image-sunscreen", "Bảo vệ da mỗi ngày" } },
+                { "duong-am",    new[] { "https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=650&q=80", "category-image-moisturizer", "Cho làn da mềm mịn" } }
+            };
+        }
+        <div class="row g-3 g-md-4">
+            @foreach (var c in Model.Categories)
+            {
+                string slug = nv3.Helpers.ProductHelper.ToSlug(c.CategoryName);
+                var meta = catMeta.ContainsKey(slug) ? catMeta[slug] : catMeta["cham-soc-da"];
+                <div class="col-6 col-lg-3">
+                    <a class="category-card"
+                       href="@Url.Action("Index", "Product", new { category = slug })">
+                        <div class="category-image @meta[1]">
+                            <img src="@meta[0]" alt="Danh mục @c.CategoryName" loading="lazy" />
+                            <span class="category-arrow" aria-hidden="true">↗</span>
+                        </div>
+                        <div class="category-info">
+                            <h3>@c.CategoryName</h3>
+                            <p>@meta[2]</p>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="home-section featured-section" id="featured-products">
+    <div class="container">
+        <div class="section-topline">
+            <div>
+                <span class="section-eyebrow">YOUR BEAUTY PICKS</span>
+                <h2 class="section-heading">Gợi ý dành cho bạn</h2>
+                <p class="section-subtitle">
+                    Một vài lựa chọn nổi bật để bạn bắt đầu khám phá.
+                </p>
+            </div>
+
+            <a href="@Url.Action("Index", "Product")"
+               class="section-more">
+                Tất cả sản phẩm <span aria-hidden="true">→</span>
+            </a>
+        </div>
+
+        <div class="row g-3 g-md-4">
+            @foreach (var p in Model.FeaturedProducts)
+            {
+                var detail = nv3.Helpers.ProductHelper.FirstInStock(p);
+                bool isOutOfStock = (detail == null);
+                <div class="col-6 col-lg-3">
+                    <article class="home-product-card @(isOutOfStock ? "is-out-of-stock" : "")">
+                        <a class="home-product-image"
+                           href="@Url.Action("Detail", "Product", new { id = p.ProductId })"
+                           aria-label="Xem @p.Name">
+                            <img src="@Url.Content("~/Images/" + p.Image)"
+                                 alt="@p.Name"
+                                 loading="lazy" />
+                            @if (isOutOfStock)
+                            {
+                                <div class="sold-out-overlay">
+                                    <span class="sold-out-badge">Hết hàng</span>
+                                </div>
+                            }
+                        </a>
+                        <div class="home-product-info">
+                            <span class="product-brand">@p.Brand</span>
+                            <h3>
+                                <a href="@Url.Action("Detail", "Product", new { id = p.ProductId })">@p.Name</a>
+                            </h3>
+                            <p class="product-description">@nv3.Helpers.ProductHelper.DisplayPrice(p).ToString("N0") VNĐ</p>
+                            @if (isOutOfStock)
+                            {
+                                <div class="mb-2">
+                                    <span class="badge bg-secondary text-white" style="font-size: 11px;">Tạm hết hàng</span>
+                                </div>
+                            }
+                            <a class="product-view-link"
+                               href="@Url.Action("Detail", "Product", new { id = p.ProductId })">
+                                Xem sản phẩm <span aria-hidden="true">→</span>
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="home-about">
+    <div class="container">
+        <div class="about-panel">
+            <div class="about-decoration" aria-hidden="true">♡</div>
+
+            <div class="about-content">
+                <span class="section-eyebrow">A LITTLE SELF-CARE</span>
+                <h2>
+                    Dành một chút yêu thương
+                    <span>cho chính mình.</span>
+                </h2>
+                <p>
+                    Làm đẹp không phải để trở thành một ai khác.
+                    Đó là cách bạn chăm sóc bản thân và tự tin hơn mỗi ngày.
+                </p>
+                <a href="@Url.Action("Index", "Product")"
+                   class="btn-pink">
+                    Tìm sản phẩm phù hợp <span aria-hidden="true">→</span>
+                </a>
+            </div>
+
+            <div class="about-image">
+                <img src="https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?auto=format&fit=crop&w=900&q=80"
+                     alt="Không gian chăm sóc sắc đẹp"
+                     loading="lazy" />
+            </div>
+        </div>
+    </div>
 </section>
