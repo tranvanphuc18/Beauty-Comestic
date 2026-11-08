@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Web.Mvc;
 using nv3.Models;
@@ -19,10 +19,13 @@ namespace nv3.Controllers
             ViewBag.TotalCategories = db.Categories.Count();
             ViewBag.TotalCustomers = db.Users.Count(u => u.Role == "Customer");
             ViewBag.TotalOrders = db.Orders.Count();
+
+            // Doanh thu thực thu: CHỈ tính các đơn đã HOÀN THÀNH (Completed) VÀ ĐÃ THANH TOÁN (Paid)
             ViewBag.TotalRevenue = db.Orders
-                                        .Where(o => o.OrderStatus == "Completed")
+                                        .Where(o => o.OrderStatus == "Completed" && o.PaymentStatus == "Paid")
                                         .Select(o => (decimal?)o.TotalAmount)
                                         .Sum() ?? 0;
+
             ViewBag.PendingOrders = db.Orders.Count(o => o.OrderStatus == "Pending");
 
             var recentOrders = db.Orders

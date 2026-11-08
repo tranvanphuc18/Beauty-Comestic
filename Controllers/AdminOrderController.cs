@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Web.Mvc;
 using System.Data.Entity;
@@ -9,11 +9,10 @@ namespace nv3.Controllers
     public class AdminOrderController : Controller
     {
         private BeautyCosmeticDBEntities db = new BeautyCosmeticDBEntities();
-        private const int PAGE_SIZE = 15; 
+        private const int PAGE_SIZE = 15;
 
         private bool CheckAdmin() => Session["Role"] != null && Session["Role"].ToString() == "Admin";
 
-      
         public ActionResult Index(string searchCustomer = "", string paymentStatus = "", string orderStatus = "",
                                   string fromDate = "", string toDate = "", int page = 1)
         {
@@ -21,19 +20,16 @@ namespace nv3.Controllers
 
             var orders = db.Orders.Include(o => o.User).AsQueryable();
 
-          
             if (!string.IsNullOrEmpty(searchCustomer))
             {
                 orders = orders.Where(o => o.User.FullName.Contains(searchCustomer) || o.User.Email.Contains(searchCustomer));
             }
 
-           
             if (!string.IsNullOrEmpty(paymentStatus))
             {
                 orders = orders.Where(o => o.PaymentStatus == paymentStatus);
             }
 
-           
             if (!string.IsNullOrEmpty(orderStatus))
             {
                 orders = orders.Where(o => o.OrderStatus == orderStatus);
@@ -50,7 +46,6 @@ namespace nv3.Controllers
                 orders = orders.Where(o => o.OrderDate < dtTo);
             }
 
-         
             int totalOrders = orders.Count();
             int totalPages = (int)Math.Ceiling((double)totalOrders / PAGE_SIZE);
             if (totalPages == 0) totalPages = 1;
@@ -87,24 +82,62 @@ namespace nv3.Controllers
             return View(order);
         }
 
-      
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult UpdateStatus(int orderId, string orderStatus, string paymentStatus)
         {
             if (!CheckAdmin()) return RedirectToAction("Login", "Account");
 
-            var order = db.Orders.Find(orderId);
-            if (order != null)
+            var order = db.Orders
+                          .Include(o => o.OrderDetails.Select(od => od.ProductDetail))
+                          .FirstOrDefault(o => o.OrderId == orderId);
+
+            if (order == null) return HttpNotFound();
+
+            string oldStatus = order.OrderStatus;
+
+            // Ràng buộc 1: Nếu đơn đã Hoàn tất (Completed) thì không cho chuyển ngược về Pending/Confirmed
+            if (oldStatus == "Completed" && orderStatus != "Completed")
             {
-                order.OrderStatus = orderStatus;
-                if (!string.IsNullOrEmpty(paymentStatus))
-                {
-                    order.PaymentStatus = paymentStatus;
-                }
-                db.SaveChanges();
-                TempData["Success"] = "Cập nhật trạng thái đơn hàng #" + orderId + " thành công!";
+                TempData["Error"] = "Đơn hàng đã Hoàn tất (Completed), không thể chuyển ngược về trạng thái chờ!";
+                return RedirectToAction("Detail", new { id = orderId });
             }
+
+            // Ràng buộc 2: Nếu đơn đã Hủy (Cancelled) thì không cho đổi trạng thái khác
+            if (oldStatus == "Cancelled" && orderStatus != "Cancelled")
+            {
+                TempData["Error"] = "Đơn hàng đã bị Hủy (Cancelled), không thể thay đổi trạng thái!";
+                return RedirectToAction("Detail", new { id = orderId });
+            }
+
+            // Ràng buộc 3: Khi chuyển sang Hủy (Cancelled) -> TỰ ĐỘNG HOÀN TRẢ TỒN KHO
+            if (oldStatus != "Cancelled" && orderStatus == "Cancelled")
+            {
+                foreach (var od in order.OrderDetails)
+                {
+                    if (od.ProductDetail != null)
+                    {
+                        od.ProductDetail.Quantity += od.Quantity;
+                        od.ProductDetail.SoldQuantity = Math.Max(0, od.ProductDetail.SoldQuantity - od.Quantity);
+                    }
+                }
+            }
+
+            // Nếu đơn hoàn tất (Completed) -> Tự động xác nhận đã thanh toán nếu là COD
+            if (orderStatus == "Completed" && (paymentStatus == "Unpaid" || string.IsNullOrEmpty(paymentStatus)))
+            {
+                paymentStatus = "Paid";
+            }
+
+            order.OrderStatus = orderStatus;
+            if (!string.IsNullOrEmpty(paymentStatus))
+            {
+                order.PaymentStatus = paymentStatus;
+            }
+
+            db.SaveChanges();
+            TempData["Success"] = "Cập nhật trạng thái đơn hàng #" + orderId + " thành công!"
+                                + (orderStatus == "Cancelled" ? " (Đã hoàn lại số lượng sản phẩm vào kho)." : "");
 
             return RedirectToAction("Detail", new { id = orderId });
         }

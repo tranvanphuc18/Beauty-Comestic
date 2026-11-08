@@ -1,11 +1,23 @@
-﻿@model nv3.Models.Product
+@model nv3.Models.Product
 @{
     ViewBag.Title = "Chỉnh sửa sản phẩm";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var allSkinTypes = ViewBag.AllSkinTypes as List<nv3.Models.SkinType> ?? new List<nv3.Models.SkinType>();
+    var selectedSkinTypeIds = ViewBag.SelectedSkinTypeIds as List<int> ?? new List<int>();
+    decimal price = ViewBag.Price != null ? (decimal)ViewBag.Price : 0;
+    decimal? discountedPrice = ViewBag.DiscountedPrice as decimal?;
+    int quantity = ViewBag.Quantity != null ? (int)ViewBag.Quantity : 0;
 }
 
-<div class="card p-4">
-    <h4 class="mb-3">Chỉnh sửa sản phẩm #@Model.ProductId</h4>
+<div class="card p-4 shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="m-0 text-primary font-weight-bold">
+            <i class="fas fa-edit mr-1"></i> Chỉnh sửa sản phẩm #@Model.ProductId
+        </h4>
+        <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left mr-1"></i> Quay lại danh sách
+        </a>
+    </div>
     <hr />
 
     @using (Html.BeginForm("Edit", "AdminProduct", FormMethod.Post, new { enctype = "multipart/form-data" }))
@@ -23,13 +35,55 @@
 
                 <div class="row">
                     <div class="col-md-6 form-group">
-                        <label class="font-weight-bold">Danh mục</label>
+                        <label class="font-weight-bold">Danh mục <span class="text-danger">*</span></label>
                         @Html.DropDownList("CategoryId", null, new { @class = "form-control" })
                     </div>
                     <div class="col-md-6 form-group">
-                        <label class="font-weight-bold">Thương hiệu</label>
-                        @Html.TextBoxFor(m => m.Brand, new { @class = "form-control" })
+                        <label class="font-weight-bold">Thương hiệu <span class="text-danger">*</span></label>
+                        @Html.TextBoxFor(m => m.Brand, new { @class = "form-control", required = "required" })
                     </div>
+                </div>
+
+                <!-- GIÁ BÁN & GIÁ KHUYẾN MÃI -->
+                <div class="row">
+                    <div class="col-md-4 form-group">
+                        <label class="font-weight-bold">Giá bán gốc (VNĐ) <span class="text-danger">*</span></label>
+                        <input type="number" name="price" value="@price.ToString("0")" class="form-control" min="0" required />
+                    </div>
+                    <div class="col-md-4 form-group">
+                        <label class="font-weight-bold text-danger">Giá khuyến mãi (VNĐ)</label>
+                        <input type="number" name="discountedPrice" value="@(discountedPrice.HasValue ? discountedPrice.Value.ToString("0") : "")"
+                               class="form-control border-danger" placeholder="Để trống nếu không giảm giá" min="0" />
+                        <small class="text-muted">Nhập giá sau giảm để tạo khuyến mãi</small>
+                    </div>
+                    <div class="col-md-4 form-group">
+                        <label class="font-weight-bold">Số lượng tồn kho</label>
+                        <input type="number" name="quantity" value="@quantity" class="form-control" min="0" />
+                    </div>
+                </div>
+
+                <!-- CHỌN LOẠI DA PHÙ HỢP -->
+                <div class="form-group p-3 border rounded bg-light">
+                    <label class="font-weight-bold text-dark mb-2">
+                        <i class="fas fa-tags text-primary mr-1"></i> Chọn loại da phù hợp:
+                    </label>
+                    <div class="row">
+                        @foreach (var skin in allSkinTypes)
+                        {
+                            <div class="col-md-4 col-6 mb-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input"
+                                           name="selectedSkinTypes" value="@skin.SkinTypeId"
+                                           id="skin_@skin.SkinTypeId"
+                                           @(selectedSkinTypeIds.Contains(skin.SkinTypeId) ? "checked" : "") />
+                                    <label class="custom-control-label font-weight-normal" for="skin_@skin.SkinTypeId">
+                                        @skin.SkinTypeName
+                                    </label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <small class="text-muted fst-italic">Tích chọn các loại da để khách hàng có thể lọc tìm kiếm sản phẩm này.</small>
                 </div>
 
                 <div class="form-group">
@@ -37,25 +91,29 @@
                     @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = 4 })
                 </div>
 
-                <div class="form-check">
-                    @Html.CheckBoxFor(m => m.Recommend, new { @class = "form-check-input" })
-                    <label class="form-check-label font-weight-bold">Gợi ý / Nổi bật</label>
+                <div class="form-check mb-3">
+                    @Html.CheckBoxFor(m => m.Recommend, new { @class = "form-check-input", id = "checkRecommend" })
+                    <label class="form-check-label font-weight-bold" for="checkRecommend">Gợi ý / Nổi bật</label>
                 </div>
             </div>
 
             <div class="col-md-4">
                 <label class="font-weight-bold">Ảnh hiện tại</label>
-                <div class="text-center border p-2 mb-2" style="background:#f8f9fa;">
+                <div class="text-center border p-2 mb-2" style="background:#f8f9fa; border-radius: 6px;">
                     <img id="preview" src="@Url.Content("~/Content/Uploads/Products/" + Model.Image)"
-                         onerror="this.src='https://via.placeholder.com/200';" style="max-width: 100%; height: 200px; object-fit: contain;" />
+                         onerror="this.onerror=null; this.src='@Url.Content("~/Images/" + Model.Image)';"
+                         style="max-width: 100%; height: 200px; object-fit: contain;" />
                 </div>
                 <label class="font-weight-bold">Chọn ảnh mới thay thế:</label>
                 <input type="file" name="imageFile" class="form-control-file" accept="image/*" onchange="previewImg(this);" />
+                <small class="text-muted d-block mt-2">Ảnh mới sẽ tự động đồng bộ sang cả trang khách hàng.</small>
             </div>
         </div>
 
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i> Cập nhật</button>
+        <div class="mt-4 pt-3 border-top">
+            <button type="submit" class="btn btn-primary px-4 font-weight-bold">
+                <i class="fas fa-save mr-1"></i> Cập nhật sản phẩm
+            </button>
             <a href="@Url.Action("Index")" class="btn btn-secondary ml-2">Hủy bỏ</a>
         </div>
     }

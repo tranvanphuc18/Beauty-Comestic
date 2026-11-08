@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -13,8 +13,6 @@ namespace nv3.Controllers
     [CustomerAuthorize]
     public class OrderController : Controller
     {
-        // Giá trị mặc định khi tạo đơn. Nếu database có CHECK constraint cho các cột này
-        // (OrderStatus / PaymentStatus / PaymentMethod) thì sửa lại cho đúng với script SQL của nhóm.
         private const string DefaultOrderStatus = "Pending";
         private const string DefaultPaymentStatus = "Unpaid";
         private const string DefaultPaymentMethod = "COD";
@@ -65,7 +63,6 @@ namespace nv3.Controllers
                 return View(model);
             }
 
-            // Lấy lại biến thể từ DB để kiểm tra tồn kho lần cuối
             var ids = cart.Select(i => i.ProductDetailId).ToList();
             var details = db.ProductDetails
                             .Where(d => ids.Contains(d.ProductDetailId))
@@ -81,7 +78,6 @@ namespace nv3.Controllers
                 }
             }
 
-            // Bảng Orders không có cột tên/SĐT người nhận nên ghép vào ShippingAddress
             string shipping = model.ReceiverName.Trim() + " - " + model.ReceiverPhone.Trim()
                               + " - " + model.ShippingAddress.Trim();
 
@@ -117,7 +113,7 @@ namespace nv3.Controllers
             order.TotalAmount = total;
 
             db.Orders.Add(order);
-            db.SaveChanges();   // một lần SaveChanges = một transaction: hoặc lưu hết, hoặc không lưu gì
+            db.SaveChanges();
 
             CartHelper.Clear();
             return RedirectToAction("Success", new { id = order.OrderId });
@@ -135,6 +131,7 @@ namespace nv3.Controllers
         {
             int userId = CurrentCustomerId;
             var orders = db.Orders
+                .Include(o => o.OrderDetails.Select(od => od.ProductDetail.Product))
                 .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.OrderDate)
                 .ToList();
@@ -146,6 +143,37 @@ namespace nv3.Controllers
             var order = GetOwnOrder(id);
             if (order == null) return HttpNotFound();
             return View(order);
+        }
+
+        // ---------- KHÁCH HÀNG HỦY ĐƠN ----------
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Cancel(int id)
+        {
+            var order = GetOwnOrder(id);
+            if (order == null) return HttpNotFound();
+
+            if (order.OrderStatus != "Pending")
+            {
+                TempData["Error"] = "Đơn hàng #" + id + " chỉ có thể hủy khi đang ở trạng thái 'Chờ duyệt' (Pending).";
+                return RedirectToAction("Detail", new { id = id });
+            }
+
+            order.OrderStatus = "Cancelled";
+
+            // Hoàn trả lại số lượng tồn kho và giảm số lượng đã bán
+            foreach (var line in order.OrderDetails)
+            {
+                if (line.ProductDetail != null)
+                {
+                    line.ProductDetail.Quantity += line.Quantity;
+                    line.ProductDetail.SoldQuantity = Math.Max(0, line.ProductDetail.SoldQuantity - line.Quantity);
+                }
+            }
+
+            db.SaveChanges();
+            TempData["Success"] = "Đã hủy đơn hàng #" + id + " thành công. Số lượng sản phẩm đã được hoàn lại vào kho.";
+            return RedirectToAction("History");
         }
 
         // ---------- MUA LẠI ----------
@@ -201,7 +229,6 @@ namespace nv3.Controllers
             return RedirectToAction("Index", "Cart");
         }
 
-        // Chỉ trả về đơn nếu đúng là của khách đang đăng nhập
         private Order GetOwnOrder(int id)
         {
             int userId = CurrentCustomerId;
