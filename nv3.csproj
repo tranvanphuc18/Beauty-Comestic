@@ -149,7 +149,9 @@
     <Compile Include="Models\BeautyCosmeticModel.Context.cs" />
     <Compile Include="Models\BeautyCosmeticModel.cs" />
     <Compile Include="Models\BeautyCosmeticModel.Designer.cs">
-      <DependentUpon>BeautyCosmeticModel.cs</DependentUpon>
+      <DependentUpon>BeautyCosmeticModel.edmx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Models\Category.cs" />
     <Compile Include="Models\Order.cs" />
