@@ -1,4 +1,4 @@
-﻿using System.Data.Entity;
+using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
 using nv3.Models;
@@ -15,11 +15,10 @@ namespace nv3.Controllers
             var model = new HomeViewModel
             {
                 Categories = db.Categories.OrderBy(c => c.CategoryId).ToList(),
-                // Chỉ lấy sản phẩm còn hàng (có ít nhất 1 biến thể còn tồn), ưu tiên bán chạy
+                // Lấy sản phẩm nổi bật theo số lượng đã bán (kể cả hết hàng vẫn hiển thị badge hết hàng)
                 FeaturedProducts = db.Products
                     .Include(p => p.ProductDetails)
-                    .Where(p => p.ProductDetails.Any(d => d.Quantity > 0))
-                    .OrderByDescending(p => p.ProductDetails.Sum(d => d.SoldQuantity))
+                    .OrderByDescending(p => p.ProductDetails.Sum(d => (int?)d.SoldQuantity) ?? 0)
                     .Take(8)
                     .ToList()
             };

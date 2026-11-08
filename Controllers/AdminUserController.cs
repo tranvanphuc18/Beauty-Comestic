@@ -1,8 +1,9 @@
-﻿using System;
+﻿using nv3.Helpers;
+using nv3.Models;
+using System;
+using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
-using System.Data.Entity;
-using nv3.Models;
 
 namespace nv3.Controllers
 {
@@ -47,7 +48,7 @@ namespace nv3.Controllers
 
             if (ModelState.IsValid)
             {
-                user.PasswordHash = Password; 
+                user.PasswordHash = PasswordHelper.Hash(Password);
                 user.Role = "Admin";
                 user.CreatedAt = DateTime.Now;
                 db.Users.Add(user);

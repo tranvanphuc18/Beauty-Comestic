@@ -86,6 +86,11 @@ namespace nv3.Controllers
 
             Session["CustomerID"] = customer.UserId;
             Session["CustomerName"] = customer.FullName;
+            Session["FullName"] = customer.FullName;
+            Session["UserEmail"] = customer.Email;
+            Session["Role"] = customer.Role;
+            if (customer.Role == "Admin")
+                return RedirectToAction("Index", "AdminDashboard");
 
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {

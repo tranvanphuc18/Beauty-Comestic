@@ -1,4 +1,4 @@
-﻿@model IEnumerable<nv3.Models.Product>
+@model IEnumerable<nv3.Models.Product>
 
 @{
     ViewBag.Title = "Danh sách sản phẩm";
@@ -10,7 +10,6 @@
     int[] selSkin = (ViewBag.SelectedSkinTypes as int[]) ?? new int[0];
     string[] selBrands = (ViewBag.SelectedBrands as string[]) ?? new string[0];
 
-    // Tạo link chuyển trang nhưng vẫn giữ nguyên từ khóa + bộ lọc đang chọn
     Func<int, string> pageUrl = p =>
     {
         var qs = new List<string>();
@@ -45,8 +44,10 @@
                     {
                         var detail = nv3.Helpers.ProductHelper.FirstInStock(product);
                         var price = nv3.Helpers.ProductHelper.DisplayPrice(product);
+                        bool isOutOfStock = (detail == null);
+
                         <div class="col-md-6 col-xl-4">
-                            <div class="card product-card">
+                            <div class="card product-card @(isOutOfStock ? "is-out-of-stock" : "")">
                                 <a class="product-media"
                                    href="@Url.Action("Detail", "Product", new { id = product.ProductId })"
                                    tabindex="-1"
@@ -55,6 +56,13 @@
                                          class="product-image"
                                          alt="@product.Name"
                                          loading="lazy" />
+
+                                    @if (isOutOfStock)
+                                    {
+                                        <div class="sold-out-overlay">
+                                            <span class="sold-out-badge">Hết hàng</span>
+                                        </div>
+                                    }
                                 </a>
 
                                 <div class="card-body">
@@ -75,7 +83,7 @@
                                         @Html.ActionLink("Xem chi tiết", "Detail", "Product",
                                             new { id = product.ProductId }, new { @class = "btn btn-primary" })
 
-                                        @if (detail != null)
+                                        @if (!isOutOfStock)
                                         {
                                             using (Html.BeginForm("Add", "Cart", FormMethod.Post, new { @class = "d-inline" }))
                                             {
@@ -85,6 +93,12 @@
                                                 <input type="hidden" name="returnUrl" value="@Request.RawUrl" />
                                                 <button type="submit" class="btn btn-danger">Thêm vào giỏ hàng</button>
                                             }
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-secondary btn-out-of-stock" disabled title="Sản phẩm tạm hết hàng">
+                                                Hết hàng
+                                            </button>
                                         }
                                     </div>
                                 </div>

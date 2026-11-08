@@ -132,6 +132,7 @@
     <Compile Include="Attributes\CustomerAuthorizeAttribute.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AdminCategoryController.cs" />
+    <Compile Include="Controllers\AdminDashboardController.cs" />
     <Compile Include="Controllers\AdminOrderController.cs" />
     <Compile Include="Controllers\AdminProductController.cs" />
     <Compile Include="Controllers\AdminUserController.cs" />
@@ -233,6 +234,7 @@
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\product-filter.js" />
     <Content Include="Scripts\site.js" />
+    <Content Include="SQLQuery3.sql" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -272,6 +274,7 @@
     <Content Include="Views\AdminUser\Index.cshtml" />
     <Content Include="Views\AdminOrder\Detail.cshtml" />
     <Content Include="Views\AdminOrder\Index.cshtml" />
+    <Content Include="Views\AdminDashboard\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

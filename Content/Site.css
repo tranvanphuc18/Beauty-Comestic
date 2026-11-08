@@ -779,3 +779,76 @@ img {
         font-size: 15px;
     }
 }
+
+
+/* ========================================================
+   SHOPEE-STYLE OUT OF STOCK (HIỂN THỊ HẾT HÀNG)
+   ======================================================== */
+.product-media,
+.home-product-image {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Làm mờ và giảm độ bão hòa ảnh sản phẩm giống Shopee */
+.product-card.is-out-of-stock .product-image,
+.home-product-card.is-out-of-stock .home-product-image img,
+.product-img-out-of-stock {
+    opacity: 0.52 !important;
+    filter: grayscale(35%) !important;
+    transition: opacity 0.3s ease;
+}
+
+/* Lớp phủ Shopee */
+.sold-out-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.25);
+    z-index: 5;
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+/* Vòng tròn "HẾT HÀNG" chuẩn nhận diện Shopee */
+.sold-out-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.25;
+    padding: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.75);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(2px);
+}
+
+/* Nút thêm vào giỏ khi hết hàng: làm mờ và vô hiệu hoá */
+.btn-out-of-stock {
+    background-color: #adb5bd !important;
+    border-color: #adb5bd !important;
+    color: #ffffff !important;
+    cursor: not-allowed !important;
+    opacity: 0.65 !important;
+    flex-grow: 1.4;
+}
+
+.product-card.is-out-of-stock .product-price {
+    opacity: 0.7;
+}
