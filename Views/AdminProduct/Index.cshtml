@@ -1,28 +1,40 @@
-﻿@model IEnumerable<nv3.Models.Product>
+@model IEnumerable<nv3.Models.Product>
 @{
     ViewBag.Title = "Quản lý sản phẩm";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="card p-3">
+<div class="card p-3 shadow-sm">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="m-0 text-primary">Danh sách sản phẩm</h4>
-        <a href="@Url.Action("Create")" class="btn btn-success">
-            <i class="fas fa-plus"></i> Thêm sản phẩm mới
+        <h4 class="m-0 text-primary font-weight-bold">
+            <i class="fas fa-box mr-1"></i> Danh sách sản phẩm
+        </h4>
+        <a href="@Url.Action("Create")" class="btn btn-success font-weight-bold">
+            <i class="fas fa-plus-circle mr-1"></i> Thêm sản phẩm mới
         </a>
     </div>
 
-    <table class="table table-bordered table-hover">
+    @using (Html.BeginForm("Index", "AdminProduct", FormMethod.Get, new { @class = "form-inline mb-3" }))
+    {
+        <input type="text" name="keyword" value="@ViewBag.Keyword" class="form-control mr-2" placeholder="Tìm tên / thương hiệu..." style="width: 300px;" />
+        <button type="submit" class="btn btn-primary mr-2"><i class="fas fa-search"></i> Tìm</button>
+        if (!string.IsNullOrEmpty(ViewBag.Keyword as string))
+        {
+            <a href="@Url.Action("Index")" class="btn btn-outline-secondary">Xóa lọc</a>
+        }
+    }
+
+    <table class="table table-bordered table-hover align-middle">
         <thead class="thead-light">
             <tr>
-                <th style="width: 50px;">#</th>
-                <th style="width: 80px;">Ảnh</th>
+                <th style="width: 50px;" class="text-center">#</th>
+                <th style="width: 80px;" class="text-center">Ảnh</th>
                 <th>Tên sản phẩm</th>
                 <th>Thương hiệu</th>
                 <th>Danh mục</th>
                 <th>Giá bán</th>
-                <th>Tồn kho</th>
-                <th style="width: 150px;">Thao tác</th>
+                <th class="text-center">Tồn kho</th>
+                <th style="width: 120px;" class="text-center">Thao tác</th>
             </tr>
         </thead>
         <tbody>
@@ -32,41 +44,49 @@
                 var firstDetail = item.ProductDetails != null ? item.ProductDetails.FirstOrDefault() : null;
                 int totalStock = item.ProductDetails != null ? item.ProductDetails.Sum(d => d.Quantity) : 0;
                 <tr>
-                    <td>@stt++</td>
-                    <td>
+                    <td class="text-center font-weight-bold">@(stt++)</td>
+                    <td class="text-center">
                         @if (!string.IsNullOrEmpty(item.Image))
                         {
                             <img src="@Url.Content("~/Content/Uploads/Products/" + item.Image)"
-                                 onerror="this.src='https://via.placeholder.com/60';" width="60" height="60" style="object-fit:cover; border-radius:4px;" />
+                                 onerror="this.onerror=null; this.src='@Url.Content("~/Images/" + item.Image)';"
+                                 alt="@item.Name"
+                                 width="60" height="60"
+                                 style="object-fit: contain; border-radius: 6px; border: 1px solid #e3e6f0; background: #fff; padding: 2px;" />
+                        }
+                        else
+                        {
+                            <span class="badge badge-secondary">Chưa có ảnh</span>
                         }
                     </td>
                     <td><strong>@item.Name</strong></td>
                     <td>@item.Brand</td>
                     <td>@(item.Category != null ? item.Category.CategoryName : "N/A")</td>
-                    <td>
+                    <td class="font-weight-bold text-danger">
                         @(firstDetail != null ? string.Format("{0:N0} đ", firstDetail.Price) : "Chưa có giá")
                     </td>
-                    <td>
+                    <td class="text-center">
                         @if (totalStock == 0)
                         {
-                            <span class="badge badge-danger">Hết hàng</span>
+                            <span class="badge badge-danger px-2 py-1">Hết hàng</span>
+                        }
+                        else if (totalStock <= 5)
+                        {
+                            <span class="badge badge-danger px-2 py-1">Còn @totalStock (Gấp)</span>
                         }
                         else
                         {
-                            <span class="badge badge-success">@totalStock</span>
+                            <span class="badge badge-success px-2 py-1">Còn @totalStock</span>
                         }
                     </td>
-                    <td>
-                        <a href="@Url.Action("Detail", new { id = item.ProductId })" class="btn btn-sm btn-info" title="Xem chi tiết">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        <a href="@Url.Action("Edit", new { id = item.ProductId })" class="btn btn-sm btn-warning" title="Chỉnh sửa">
-                            <i class="fas fa-edit"></i>
+                    <td class="text-center">
+                        <a href="@Url.Action("Edit", new { id = item.ProductId })" class="btn btn-sm btn-warning mr-1" title="Chỉnh sửa sản phẩm">
+                            <i class="fas fa-edit mr-1"></i> Sửa
                         </a>
                         @using (Html.BeginForm("Delete", "AdminProduct", new { id = item.ProductId }, FormMethod.Post, new { style = "display:inline;" }))
                         {
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn chắc chắn muốn xóa sản phẩm này?');" title="Xóa">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn chắc chắn muốn xóa sản phẩm này?');" title="Xóa sản phẩm">
                                 <i class="fas fa-trash"></i>
                             </button>
                         }

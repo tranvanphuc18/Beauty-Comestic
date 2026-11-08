@@ -1,4 +1,4 @@
-﻿@model nv3.Models.Product
+@model nv3.Models.Product
 @{
     ViewBag.Title = "Chỉnh sửa sản phẩm";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
@@ -47,7 +47,8 @@
                 <label class="font-weight-bold">Ảnh hiện tại</label>
                 <div class="text-center border p-2 mb-2" style="background:#f8f9fa;">
                     <img id="preview" src="@Url.Content("~/Content/Uploads/Products/" + Model.Image)"
-                         onerror="this.src='https://via.placeholder.com/200';" style="max-width: 100%; height: 200px; object-fit: contain;" />
+                         onerror="this.onerror=null; this.src='@Url.Content("~/Images/" + Model.Image)';"
+                         style="max-width: 100%; height: 200px; object-fit: contain;" />
                 </div>
                 <label class="font-weight-bold">Chọn ảnh mới thay thế:</label>
                 <input type="file" name="imageFile" class="form-control-file" accept="image/*" onchange="previewImg(this);" />

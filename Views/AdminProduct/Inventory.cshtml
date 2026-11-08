@@ -1,29 +1,73 @@
-﻿@model IEnumerable<nv3.Models.ProductDetail>
+@model IEnumerable<nv3.Models.ProductDetail>
 @{
-    ViewBag.Title = "Quản lý tồn kho";
+    ViewBag.Title = "Quản lý tồn kho & Nhập hàng";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="card p-3">
+<!-- KHỐI FORM NHẬP HÀNG NHANH -->
+<div class="card p-3 mb-4 shadow-sm border-left-success" style="border-left: 5px solid #28a745;">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="m-0 font-weight-bold text-success">
+            <i class="fas fa-truck-loading mr-2"></i> Phiếu nhập hàng vào kho
+        </h5>
+        <span class="badge badge-light border text-muted">Bổ sung số lượng tồn kho</span>
+    </div>
+    <p class="text-muted small mb-3">Chọn sản phẩm cần nhập thêm hàng, nhập số lượng và bấm xác nhận để cập nhật tồn kho.</p>
+
+    @using (Html.BeginForm("UpdateStock", "AdminProduct", FormMethod.Post, new { @class = "form-row align-items-end" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="col-md-5 mb-2">
+            <label class="font-weight-bold small text-secondary">Chọn sản phẩm & phân loại:</label>
+            <select name="productDetailId" class="form-control" required>
+                <option value="">-- Chọn sản phẩm cần nhập hàng --</option>
+                @foreach (var item in Model.OrderBy(x => x.Quantity))
+                {
+                    string stockText = item.Quantity <= 0 ? "(HẾT HÀNG)" : $"(Còn {item.Quantity})";
+                    <option value="@item.ProductDetailId">
+                        @(item.Product != null ? item.Product.Name : "N/A") - [@item.DetailName] @stockText
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-3 mb-2">
+            <label class="font-weight-bold small text-secondary">Số lượng nhập thêm:</label>
+            <input type="number" name="addQuantity" class="form-control" min="1" value="20" placeholder="Số lượng" required />
+        </div>
+
+        <div class="col-md-4 mb-2">
+            <button type="submit" class="btn btn-success btn-block font-weight-bold">
+                <i class="fas fa-plus-circle mr-1"></i> Xác nhận nhập kho
+            </button>
+        </div>
+    }
+</div>
+
+<!-- BẢNG DANH SÁCH TỒN KHO & THAO TÁC NHẬP HÀNG TỪNG MÓN -->
+<div class="card p-3 shadow-sm">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="m-0 text-primary">Tình trạng tồn kho theo Checklist</h4>
+        <h5 class="m-0 text-primary font-weight-bold">
+            <i class="fas fa-boxes mr-1"></i> Danh sách tồn kho theo sản phẩm
+        </h5>
         <div>
-            <span class="badge badge-danger p-2 mr-1">Cần nhập gấp (<= 5)</span>
-            <span class="badge badge-warning p-2 mr-1">Sắp hết (<= 20)</span>
-            <span class="badge badge-success p-2">Còn hàng (> 20)</span>
+            <span class="badge badge-danger p-2 mr-1">Cần nhập gấp (&le; 5)</span>
+            <span class="badge badge-warning p-2 mr-1">Sắp hết (&le; 20)</span>
+            <span class="badge badge-success p-2">Còn hàng (&gt; 20)</span>
         </div>
     </div>
 
-    <table class="table table-bordered table-hover">
+    <table class="table table-bordered table-hover align-middle">
         <thead class="thead-light">
             <tr>
-                <th>#</th>
-                <th>Sản phẩm</th>
+                <th style="width: 40px;" class="text-center">#</th>
+                <th>Tên sản phẩm</th>
                 <th>Phân loại / Chi tiết</th>
                 <th>Giá bán</th>
-                <th>Số lượng tồn</th>
-                <th>Đã bán</th>
-                <th>Đánh giá trạng thái</th>
+                <th class="text-center">Số lượng tồn</th>
+                <th class="text-center">Đã bán</th>
+                <th class="text-center">Trạng thái</th>
+                <th style="width: 220px;" class="text-center text-success">Thao tác nhập hàng</th>
             </tr>
         </thead>
         <tbody>
@@ -31,33 +75,56 @@
             @foreach (var item in Model)
             {
                 string rowClass = "";
-                if (item.Quantity == 0) { rowClass = "table-danger font-weight-bold"; }
+                if (item.Quantity == 0) { rowClass = "table-danger"; }
                 else if (item.Quantity <= 5) { rowClass = "table-danger"; }
                 else if (item.Quantity <= 20) { rowClass = "table-warning"; }
 
                 <tr class="@rowClass">
-                    <td>@stt++</td>
-                    <td><strong>@(item.Product != null ? item.Product.Name : "N/A")</strong></td>
+                    <td class="text-center font-weight-bold">@(stt++)</td>
+                    <td>
+                        <strong>@(item.Product != null ? item.Product.Name : "N/A")</strong>
+                        @if (item.Product != null && item.Product.Category != null)
+                        {
+                            <br /><small class="text-muted">@item.Product.Category.CategoryName</small>
+                        }
+                    </td>
                     <td>@item.DetailName</td>
                     <td>@string.Format("{0:N0} đ", item.Price)</td>
-                    <td><strong>@item.Quantity</strong></td>
-                    <td>@item.SoldQuantity</td>
-                    <td>
+                    <td class="text-center font-weight-bold" style="font-size: 1.1rem;">
+                        @item.Quantity
+                    </td>
+                    <td class="text-center">@item.SoldQuantity</td>
+                    <td class="text-center">
                         @if (item.Quantity == 0)
                         {
-                            <span class="badge badge-danger">Hết hàng!</span>
+                            <span class="badge badge-danger px-2 py-1">Hết hàng!</span>
                         }
                         else if (item.Quantity <= 5)
                         {
-                            <span class="badge badge-danger">CẦN NHẬP THÊM GẤP</span>
+                            <span class="badge badge-danger px-2 py-1">CẦN NHẬP GẤP</span>
                         }
                         else if (item.Quantity <= 20)
                         {
-                            <span class="badge badge-warning">Sắp hết hàng</span>
+                            <span class="badge badge-warning px-2 py-1">Sắp hết hàng</span>
                         }
                         else
                         {
-                            <span class="badge badge-success">Còn hàng an toàn</span>
+                            <span class="badge badge-success px-2 py-1">Còn hàng an toàn</span>
+                        }
+                    </td>
+                    <td>
+                        @using (Html.BeginForm("UpdateStock", "AdminProduct", FormMethod.Post, new { @class = "form-inline justify-content-center" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="productDetailId" value="@item.ProductDetailId" />
+                            <div class="input-group input-group-sm">
+                                <input type="number" name="addQuantity" value="10" min="1" class="form-control text-center" style="width: 70px;" title="Số lượng nhập thêm" />
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-success font-weight-bold" title="Bấm để nhập thêm số lượng vào kho">
+                                        <i class="fas fa-plus mr-1"></i> Nhập
+                                    </button>
+                                </div>
+                            </div>
                         }
                     </td>
                 </tr>
