@@ -1,17 +1,9 @@
-﻿@using System.Linq
+@using System.Linq
 @using System.Collections.Generic
 
 @{
     var skinTypes = (ViewBag.SkinTypeOptions as IEnumerable<nv3.Models.SkinType>) ?? new nv3.Models.SkinType[0];
-    var brands = new[]
-    {
-        new { Value = "cerave",         Label = "CeraVe" },
-        new { Value = "klairs",         Label = "Klairs" },
-        new { Value = "melano-cc",      Label = "Melano CC" },
-        new { Value = "la-roche-posay", Label = "La Roche-Posay" },
-        new { Value = "anessa",         Label = "Anessa" },
-        new { Value = "ysl",            Label = "YSL" }
-    };
+    var brandNames = (ViewBag.BrandOptions as IEnumerable<string>) ?? new string[0];
 
     var selectedSkinTypes = (ViewBag.SelectedSkinTypes as int[]) ?? new int[0];
     var selectedBrands = (ViewBag.SelectedBrands as string[]) ?? new string[0];
@@ -72,13 +64,14 @@
             <fieldset class="product-filter__group mb-4">
                 <legend class="product-filter__legend">Thương hiệu</legend>
                 <div class="product-filter__brands">
-                    @foreach (var b in brands)
+                    @foreach (var b in brandNames)
                     {
+                        string slug = nv3.Helpers.ProductHelper.ToSlug(b);
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox"
-                                   name="brands" value="@b.Value" id="brand-@b.Value"
-                                   @(selectedBrands.Contains(b.Value) ? "checked" : "") />
-                            <label class="form-check-label" for="brand-@b.Value">@b.Label</label>
+                                   name="brands" value="@slug" id="brand-@slug"
+                                   @(selectedBrands.Contains(slug) ? "checked" : "") />
+                            <label class="form-check-label" for="brand-@slug">@b</label>
                         </div>
                     }
                 </div>

@@ -1,4 +1,4 @@
-﻿@{
+@{
     bool isLoggedIn = Session["CustomerID"] != null;
     string accountUrl = isLoggedIn ? Url.Action("Profile", "Account") : Url.Action("Login", "Account");
     string accountLabel = isLoggedIn ? (Session["CustomerName"] as string ?? "Tài khoản") : "Tài khoản";
@@ -46,7 +46,6 @@
                     <span class="brand-highlight">Beauty</span><span>Cosmetic</span>
                     <span class="brand-dot">.</span>
                 </a>
-
 
                 <form class="search-box" action="@Url.Action("Index", "Product")" method="get" role="search">
                     <input type="search"
@@ -109,35 +108,8 @@
                 </button>
             </div>
 
-            <nav class="category-nav" id="mainNav" aria-label="Danh mục chính">
-                <a href="@Url.Action("Index", "Home")" class="nav-link-custom">
-                    Trang chủ
-                </a>
-
-                <a href="@Url.Action("Index", "Product")" class="nav-link-custom">
-                    Tất cả sản phẩm
-                </a>
-
-                <a href="@Url.Action("Index", "Product", new { category = "cham-soc-da" })"
-                   class="nav-link-custom">
-                    Chăm sóc da
-                </a>
-
-                <a href="@Url.Action("Index", "Product", new { category = "trang-diem" })"
-                   class="nav-link-custom">
-                    Trang điểm
-                </a>
-
-                <a href="@Url.Action("Index", "Product", new { category = "chong-nang" })"
-                   class="nav-link-custom">
-                    Chống nắng
-                </a>
-
-                <a href="@Url.Action("Index", "Product", new { category = "duong-am" })"
-                   class="nav-link-custom">
-                    Dưỡng ẩm
-                </a>
-            </nav>
+            <!-- MENU DANH MỤC ĐỘNG TỪ CƠ SỞ DỮ LIỆU -->
+            @Html.Action("CategoryMenu", "Product")
         </div>
     </header>
 
@@ -165,7 +137,7 @@
 
                     <p class="footer-description">
                         Khám phá vẻ đẹp của chính bạn với những sản phẩm
-                        chăm sóc da và làm đẹp phù hợp mỗi ngày.
+                        chăm sóc da và làm đẹp chính hãng, an toàn mỗi ngày.
                     </p>
 
                     <div class="footer-social">
@@ -198,14 +170,14 @@
                     <p>Email: support@beautycosmetics.vn</p>
                     <p>Thời gian hỗ trợ: 8:00 – 21:00</p>
                     <p class="footer-note">
-                        Thông tin liên hệ minh họa cho đồ án.
+                        Hệ thống phân phối mỹ phẩm chính hãng & uy tín hàng đầu.
                     </p>
                 </div>
             </div>
 
             <div class="footer-bottom">
                 <span>© @DateTime.Now.Year BeautyCosmetic</span>
-                <span>Giao diện học tập – Frontend Demo</span>
+                <span>Bản quyền thuộc về BeautyCosmetic. All rights reserved.</span>
             </div>
         </div>
     </footer>

@@ -1,0 +1,23 @@
+@model IEnumerable<nv3.Models.Category>
+
+<nav class="category-nav" id="mainNav" aria-label="Danh mục chính">
+    <a href="@Url.Action("Index", "Home")" class="nav-link-custom">
+        Trang chủ
+    </a>
+
+    <a href="@Url.Action("Index", "Product")" class="nav-link-custom">
+        Tất cả sản phẩm
+    </a>
+
+    @if (Model != null)
+    {
+        foreach (var c in Model)
+        {
+            string slug = nv3.Helpers.ProductHelper.ToSlug(c.CategoryName);
+            <a href="@Url.Action("Index", "Product", new { category = slug })"
+               class="nav-link-custom">
+                @c.CategoryName
+            </a>
+        }
+    }
+</nav>

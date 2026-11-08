@@ -6,6 +6,7 @@
     bool inStock = inStockDetails.Any();
     var first = inStock ? inStockDetails.First() : details.FirstOrDefault();
     var recommended = ViewBag.RecommendedProducts as List<nv3.Models.Product>;
+    bool hasDiscount = (first != null && first.DiscountedPrice.HasValue && first.DiscountedPrice.Value < first.Price);
 }
 
 <div class="container py-4">
@@ -31,6 +32,7 @@
         <div class="col-md-5">
             <div class="position-relative text-center">
                 <img src="@Url.Content("~/Images/" + Model.Image)"
+                     onerror="this.onerror=null; this.src='@Url.Content("~/Content/Uploads/Products/" + Model.Image)';"
                      alt="@Model.Name"
                      class="img-fluid rounded border p-3 bg-white @(!inStock ? "product-img-out-of-stock" : "")"
                      style="max-height: 380px; width: 100%; object-fit: contain;" />
@@ -39,6 +41,12 @@
                     <div class="sold-out-overlay rounded">
                         <span class="sold-out-badge">Hết hàng</span>
                     </div>
+                }
+                else if (hasDiscount)
+                {
+                    <span class="badge bg-danger position-absolute top-0 start-0 m-3 px-3 py-2 shadow-sm font-weight-bold" style="font-size: 13px;">
+                        ĐANG KHUYẾN MÃI
+                    </span>
                 }
             </div>
         </div>
@@ -79,14 +87,20 @@
                 }
             </div>
 
-            <!-- Giá hiển thị -->
+            <!-- Giá hiển thị & Khuyến mãi -->
             <div class="p-3 mb-3 rounded" style="background-color: #fff5f7;">
+                @if (hasDiscount)
+                {
+                    <del class="text-muted small me-2" id="detailOriginalPrice" style="font-size: 1.1rem;">
+                        @(first != null ? first.Price.ToString("N0") : "0") đ
+                    </del>
+                }
                 <span class="fs-3 fw-bold text-danger" id="detailPrice">
                     @(first != null ? nv3.Helpers.ProductHelper.UnitPrice(first).ToString("N0") : "0") VNĐ
                 </span>
             </div>
 
-            <!-- LOẠI DA PHÙ HỢP (Trả lời yêu cầu của cô giáo) -->
+            <!-- LOẠI DA PHÙ HỢP -->
             <div class="mb-3 p-3 rounded border bg-light">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <strong class="text-dark small text-uppercase" style="letter-spacing: 0.5px;">
@@ -192,7 +206,7 @@
         </div>
     </div>
 
-    <!-- KHỐI GỢI Ý SẢN PHẨM (BÁN CHẠY & ĐƯỢC ƯA CHUỘNG NHẤT) -->
+    <!-- KHỐI GỢI Ý SẢN PHẨM -->
     @if (recommended != null && recommended.Any())
     {
         <div class="mt-5 pt-4">
@@ -222,7 +236,9 @@
                     <div class="col-6 col-md-3">
                         <div class="card h-100 border rounded-3 shadow-sm product-card @(pOutOfStock ? "is-out-of-stock" : "")">
                             <a class="product-media position-relative d-block text-center p-2" href="@Url.Action("Detail", "Product", new { id = p.ProductId })">
-                                <img src="@Url.Content("~/Images/" + p.Image)" class="product-image" alt="@p.Name" style="height: 160px; width: 100%; object-fit: contain;" />
+                                <img src="@Url.Content("~/Images/" + p.Image)"
+                                     onerror="this.onerror=null; this.src='@Url.Content("~/Content/Uploads/Products/" + p.Image)';"
+                                     class="product-image" alt="@p.Name" style="height: 160px; width: 100%; object-fit: contain;" />
                                 @if (pOutOfStock)
                                 {
                                     <div class="sold-out-overlay">

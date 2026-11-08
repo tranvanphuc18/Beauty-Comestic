@@ -45,6 +45,7 @@
                         var detail = nv3.Helpers.ProductHelper.FirstInStock(product);
                         var price = nv3.Helpers.ProductHelper.DisplayPrice(product);
                         bool isOutOfStock = (detail == null);
+                        bool hasDiscount = (detail != null && detail.DiscountedPrice.HasValue && detail.DiscountedPrice.Value < detail.Price);
 
                         <div class="col-md-6 col-xl-4">
                             <div class="card product-card @(isOutOfStock ? "is-out-of-stock" : "")">
@@ -53,6 +54,7 @@
                                    tabindex="-1"
                                    aria-hidden="true">
                                     <img src="@Url.Content("~/Images/" + product.Image)"
+                                         onerror="this.onerror=null; this.src='@Url.Content("~/Content/Uploads/Products/" + product.Image)';"
                                          class="product-image"
                                          alt="@product.Name"
                                          loading="lazy" />
@@ -62,6 +64,12 @@
                                         <div class="sold-out-overlay">
                                             <span class="sold-out-badge">Hết hàng</span>
                                         </div>
+                                    }
+                                    else if (hasDiscount)
+                                    {
+                                        <span class="badge bg-danger position-absolute top-0 end-0 m-2 px-2 py-1 shadow-sm">
+                                            Giảm giá
+                                        </span>
                                     }
                                 </a>
 
@@ -75,6 +83,10 @@
                                     </h4>
 
                                     <p class="product-price">
+                                        @if (hasDiscount)
+                                        {
+                                            <del class="text-muted small fw-normal d-block" style="font-size: 13px;">@detail.Price.ToString("N0") đ</del>
+                                        }
                                         @price.ToString("N0")
                                         <small>VNĐ</small>
                                     </p>

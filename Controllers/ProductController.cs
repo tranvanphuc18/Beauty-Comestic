@@ -59,7 +59,7 @@ namespace nv3.Controllers
 
             var list = query.OrderBy(p => p.ProductId).ToList();
 
-            // 5) Lọc thương hiệu
+            // 5) Lọc thương hiệu (so khớp slug)
             if (brands.Length > 0)
             {
                 list = list.Where(p => brands.Contains(ProductHelper.ToSlug(p.Brand))).ToList();
@@ -78,11 +78,27 @@ namespace nv3.Controllers
             ViewBag.SelectedSkinTypes = skinTypes;
             ViewBag.SelectedBrands = brands;
             ViewBag.SelectedCategory = category;
+
+            // Lấy danh sách thương hiệu ĐỘNG từ CSDL (tự động cập nhật khi admin thêm thương hiệu mới)
+            ViewBag.BrandOptions = db.Products
+                                     .Select(p => p.Brand)
+                                     .Where(b => b != null && b.Trim() != "")
+                                     .Distinct()
+                                     .OrderBy(b => b)
+                                     .ToList();
+
             ViewBag.Page = page;
             ViewBag.TotalPages = totalPages;
             ViewBag.TotalItems = totalItems;
 
             return View(items);
+        }
+
+        [ChildActionOnly]
+        public ActionResult CategoryMenu()
+        {
+            var categories = db.Categories.OrderBy(c => c.CategoryId).ToList();
+            return PartialView("_CategoryMenu", categories);
         }
 
         public ActionResult Detail(int? id)
@@ -92,7 +108,6 @@ namespace nv3.Controllers
                 return HttpNotFound();
             }
 
-            // Tải chi tiết sản phẩm cùng danh mục, biến thể và các loại da phù hợp
             var product = db.Products
                             .Include(p => p.Category)
                             .Include(p => p.ProductDetails)
@@ -104,7 +119,6 @@ namespace nv3.Controllers
                 return HttpNotFound();
             }
 
-            // Tăng lượt xem để đo độ ưa chuộng
             try
             {
                 product.ViewQuantity += 1;
@@ -112,7 +126,7 @@ namespace nv3.Controllers
             }
             catch { }
 
-            // GỢI Ý SẢN PHẨM: Lấy các sản phẩm cùng danh mục được mua nhiều nhất (SoldQuantity) và được xem nhiều nhất
+            // GỢI Ý SẢN PHẨM: Ưu tiên cùng danh mục, bán chạy nhất (SoldQuantity) & xem nhiều nhất (ViewQuantity)
             var recommended = db.Products
                                 .Include(p => p.ProductDetails)
                                 .Include(p => p.SkinTypes)
@@ -122,7 +136,6 @@ namespace nv3.Controllers
                                 .Take(4)
                                 .ToList();
 
-            // Nếu cùng danh mục có ít hơn 4 sản phẩm thì bổ sung các sản phẩm bán chạy nhất hệ thống
             if (recommended.Count < 4)
             {
                 var existingIds = recommended.Select(r => r.ProductId).ToList();
