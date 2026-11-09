@@ -1,0 +1,183 @@
+/* ===== Menu tài khoản trên header (rê chuột để mở) ===== */
+.header-account {
+    position: relative;
+    display: flex;
+}
+
+.account-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.account-label-text {
+    max-width: 96px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.account-caret {
+    width: 9px;
+    height: 9px;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.2s ease;
+}
+
+/* Hộp menu: padding-top tạo "cầu nối" để chuột đi từ nút xuống menu không bị mất hover */
+.account-dropdown {
+    position: absolute;
+    top: 100%;
+    right: -14px;
+    z-index: 1200;
+    min-width: 240px;
+    max-width: calc(100vw - 24px);
+    padding-top: 12px;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+}
+
+.account-dropdown-panel {
+    position: relative;
+    padding: 8px;
+    background: #fff;
+    border: 1px solid var(--border, #F0E1E7);
+    border-radius: 14px;
+    box-shadow: 0 16px 36px rgba(90, 30, 55, 0.14);
+}
+
+    /* mũi tên nhỏ chỉ lên nút tài khoản */
+    .account-dropdown-panel::before {
+        content: "";
+        position: absolute;
+        top: -6px;
+        right: 38px;
+        width: 10px;
+        height: 10px;
+        background: #fff;
+        border-top: 1px solid var(--border, #F0E1E7);
+        border-left: 1px solid var(--border, #F0E1E7);
+        transform: rotate(45deg);
+    }
+
+.account-dropdown-head {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 8px 12px 6px;
+}
+
+.account-dropdown-name {
+    overflow: hidden;
+    color: var(--text, #29252A);
+    font-size: 14px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.account-dropdown-email {
+    overflow: hidden;
+    color: var(--muted, #77717A);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.account-divider {
+    height: 1px;
+    margin: 6px 4px;
+    background: var(--border, #F0E1E7);
+}
+
+.account-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    color: var(--text, #29252A);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 10px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+    .account-item:hover,
+    .account-item:focus-visible {
+        color: var(--primary-dark, #C2185B);
+        background: var(--primary-light, #FCE7EF);
+        outline: none;
+    }
+
+.account-item-icon {
+    width: 19px;
+    height: 19px;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.account-item--danger {
+    color: #C62828;
+}
+
+    .account-item--danger:hover,
+    .account-item--danger:focus-visible {
+        color: #B71C1C;
+        background: #FDECEA;
+    }
+
+/* ----- Hiển thị menu ----- */
+
+/* Máy tính (có chuột): rê vào là mở */
+@media (hover: hover) {
+    .header-account:hover .account-dropdown {
+        visibility: visible;
+        opacity: 1;
+        transform: none;
+    }
+
+    .header-account:hover .account-trigger {
+        color: var(--primary, #E91E63);
+    }
+
+    .header-account:hover .account-caret {
+        transform: rotate(180deg);
+    }
+}
+
+/* Bàn phím (Tab) và màn hình cảm ứng (JS thêm class is-open) */
+.header-account.is-open .account-dropdown,
+.account-trigger:focus-visible + .account-dropdown,
+.account-dropdown:focus-within {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+}
+
+.header-account.is-open .account-caret {
+    transform: rotate(180deg);
+}
+
+/* Điện thoại: nhãn bị ẩn nên menu căn sát mép phải nút */
+@media (max-width: 767.98px) {
+    .account-dropdown {
+        right: -8px;
+        min-width: 230px;
+    }
+
+    .account-dropdown-panel::before {
+        right: 18px;
+    }
+}

@@ -1,0 +1,125 @@
+@model nv3.Models.Order
+
+@{
+    ViewBag.Title = "Hóa đơn #" + Model.OrderId;
+}
+
+<section class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="m-0 fw-bold">Chi tiết đơn hàng #@Model.OrderId</h2>
+        <a href="@Url.Action("History", "Order")" class="btn btn-outline-secondary btn-sm">← Lịch sử đơn hàng</a>
+    </div>
+
+    <div class="row mb-4 g-3">
+        <div class="col-md-6">
+            <div class="card p-3 h-100 shadow-sm border">
+                <h5 class="fw-bold text-secondary mb-3">Thông tin giao hàng</h5>
+                <p class="mb-2"><strong>Địa chỉ / Người nhận:</strong> @Model.ShippingAddress</p>
+                <p class="mb-0">
+                    <strong>Trạng thái đơn hàng:</strong>
+                    @if (Model.OrderStatus == "Pending")
+                    {
+                        <span class="badge bg-warning text-dark px-2 py-1">Chờ duyệt</span>
+                    }
+                    else if (Model.OrderStatus == "Confirmed")
+                    {
+                        <span class="badge bg-info text-white px-2 py-1">Đã duyệt</span>
+                    }
+                    else if (Model.OrderStatus == "Shipping")
+                    {
+                        <span class="badge bg-primary text-white px-2 py-1">Đang giao hàng</span>
+                    }
+                    else if (Model.OrderStatus == "Completed")
+                    {
+                        <span class="badge bg-success text-white px-2 py-1">Hoàn thành</span>
+                    }
+                    else if (Model.OrderStatus == "Cancelled")
+                    {
+                        <span class="badge bg-danger text-white px-2 py-1">Đã hủy</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary text-white px-2 py-1">@Model.OrderStatus</span>
+                    }
+                </p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card p-3 h-100 shadow-sm border">
+                <h5 class="fw-bold text-secondary mb-3">Thông tin thanh toán</h5>
+                <p class="mb-2"><strong>Ngày đặt:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+                <p class="mb-2"><strong>Hình thức:</strong> @Model.PaymentMethod</p>
+                <p class="mb-0">
+                    <strong>Thanh toán:</strong>
+                    @if (Model.PaymentStatus == "Paid")
+                    {
+                        <span class="badge bg-success text-white px-2 py-1">Đã thanh toán</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary text-white px-2 py-1">Chưa thanh toán</span>
+                    }
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive bg-white rounded shadow-sm border p-3 mb-4">
+        <table class="table align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th class="text-end">Đơn giá</th>
+                    <th class="text-center">Số lượng</th>
+                    <th class="text-end">Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var d in Model.OrderDetails)
+                {
+                    <tr>
+                        <td>
+                            <strong>@(d.ProductDetail != null && d.ProductDetail.Product != null ? d.ProductDetail.Product.Name : "Sản phẩm")</strong>
+                            <small class="text-muted">(@(d.ProductDetail != null ? d.ProductDetail.DetailName : ""))</small>
+                        </td>
+                        <td class="text-end">@d.UnitPrice.ToString("N0") ₫</td>
+                        <td class="text-center">@d.Quantity</td>
+                        <td class="text-end fw-bold text-danger">@d.LineTotal.ToString("N0") ₫</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="3" class="text-end fs-5">TỔNG TIỀN:</th>
+                    <th class="text-end text-danger fs-4 fw-bold">@Model.TotalAmount.ToString("N0") ₫</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="d-flex gap-2">
+        @if (Model.OrderStatus == "Pending")
+        {
+            using (Html.BeginForm("Cancel", "Order", new { id = Model.OrderId }, FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger px-4 py-2 fw-bold"
+                        onclick="return confirm('Bạn chắc chắn muốn hủy đơn hàng này?');">
+                    <i class="fas fa-times me-1"></i> Hủy đơn hàng
+                </button>
+            }
+        }
+
+        @using (Html.BeginForm("Reorder", "Order", new { id = Model.OrderId }, FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-outline-danger px-4 py-2 fw-bold">
+                Mua lại đơn này
+            </button>
+        }
+
+        <a href="@Url.Action("History", "Order")" class="btn btn-outline-secondary px-4 py-2">
+            Quay lại lịch sử
+        </a>
+    </div>
+</section>

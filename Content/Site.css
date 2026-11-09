@@ -852,3 +852,29 @@ img {
 .product-card.is-out-of-stock .product-price {
     opacity: 0.7;
 }
+
+
+/* ===== Nhãn gợi ý trang chủ: Bán chạy / Được ưa chuộng ===== */
+.pick-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 2;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: .2px;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(90, 30, 55, 0.18);
+    pointer-events: none;
+}
+
+.pick-badge--hot {
+    background: linear-gradient(135deg, #F57C00, #E91E63);
+}
+
+.pick-badge--love {
+    background: linear-gradient(135deg, #E91E63, #AD1457);
+}

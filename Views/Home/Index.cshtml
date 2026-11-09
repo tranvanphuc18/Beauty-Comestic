@@ -164,7 +164,7 @@
                 <span class="section-eyebrow">YOUR BEAUTY PICKS</span>
                 <h2 class="section-heading">Gợi ý dành cho bạn</h2>
                 <p class="section-subtitle">
-                    Một vài lựa chọn nổi bật để bạn bắt đầu khám phá.
+                    Những sản phẩm bán chạy nhất và được khách hàng ưa chuộng nhất.
                 </p>
             </div>
 
@@ -187,6 +187,11 @@
                             <img src="@Url.Content("~/Images/" + p.Image)"
                                  alt="@p.Name"
                                  loading="lazy" />
+                            @if (!isOutOfStock && Model.PickBadges != null && Model.PickBadges.ContainsKey(p.ProductId))
+                            {
+                                bool isHot = Model.PickBadges[p.ProductId] == "hot";
+                                <span class="pick-badge @(isHot ? "pick-badge--hot" : "pick-badge--love")">@(isHot ? "Bán chạy" : "Được ưa chuộng")</span>
+                            }
                             @if (isOutOfStock)
                             {
                                 <div class="sold-out-overlay">
