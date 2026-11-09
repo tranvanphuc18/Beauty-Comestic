@@ -276,10 +276,6 @@
     <Content Include="Views\AdminOrder\Detail.cshtml" />
     <Content Include="Views\AdminOrder\Index.cshtml" />
     <Content Include="Views\AdminDashboard\Index.cshtml" />
-    <Content Include="Views\Views\Order\Detail.cshtml" />
-    <Content Include="Views\Views\Order\History.cshtml" />
-    <Content Include="Views\Views\Product\Detail.cshtml" />
-    <Content Include="Views\Views\Shared\_Layout.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
