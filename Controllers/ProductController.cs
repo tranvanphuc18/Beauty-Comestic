@@ -105,7 +105,7 @@ namespace nv3.Controllers
         {
             if (id == null)
             {
-                return HttpNotFound();
+                return RedirectToAction("Index");
             }
 
             var product = db.Products

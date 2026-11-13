@@ -27,7 +27,7 @@
             @foreach (var item in Model)
             {
                 <tr>
-                    <td>@stt++</td>
+                    <td class="text-center font-weight-bold">@(stt++)</td>
                     <td><strong>@item.CategoryName</strong></td>
                     <td>@item.Description</td>
                     <td><span class="badge badge-info">@(item.Products != null ? item.Products.Count : 0) sản phẩm</span></td>

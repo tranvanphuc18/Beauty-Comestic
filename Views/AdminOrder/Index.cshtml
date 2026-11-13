@@ -49,6 +49,7 @@
     <table class="table table-bordered table-hover">
         <thead class="thead-light">
             <tr>
+                <th style="width: 50px;" class="text-center">#</th>
                 <th>Mã đơn</th>
                 <th>Khách hàng</th>
                 <th>Ngày đặt</th>
@@ -59,9 +60,11 @@
             </tr>
         </thead>
         <tbody>
+            @{ int stt = (currentPage - 1) * 15 + 1; }
             @foreach (var item in Model)
             {
                 <tr>
+                    <td class="text-center font-weight-bold">@(stt++)</td>
                     <td><strong>#@item.OrderId</strong></td>
                     <td>@(item.User != null ? item.User.FullName : "Khách vãng lai")</td>
                     <td>@item.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>

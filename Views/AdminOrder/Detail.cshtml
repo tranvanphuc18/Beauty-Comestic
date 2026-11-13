@@ -68,7 +68,7 @@
             @foreach (var d in Model.OrderDetails)
             {
                 <tr>
-                    <td>@stt++</td>
+                    <td class="text-center font-weight-bold">@(stt++)</td>
                     <td><strong>@(d.ProductDetail != null && d.ProductDetail.Product != null ? d.ProductDetail.Product.Name : "N/A")</strong></td>
                     <td>@(d.ProductDetail != null ? d.ProductDetail.DetailName : "")</td>
                     <td>@string.Format("{0:N0} đ", d.UnitPrice)</td>
