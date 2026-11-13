@@ -169,6 +169,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="BeautyCosmeticDB%281%29.sql" />
+    <Content Include="BeautyCosmeticDB_Full.sql" />
     <Content Include="Content\account-menu.css" />
     <Content Include="Content\account.css" />
     <Content Include="Content\bootstrap-grid.css" />
