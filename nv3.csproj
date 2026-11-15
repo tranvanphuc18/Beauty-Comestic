@@ -146,21 +146,45 @@
     <Compile Include="Helpers\CartHelper.cs" />
     <Compile Include="Helpers\PasswordHelper.cs" />
     <Compile Include="Helpers\ProductHelper.cs" />
-    <Compile Include="Models\Banner.cs" />
-    <Compile Include="Models\BeautyCosmeticModel.Context.cs" />
-    <Compile Include="Models\BeautyCosmeticModel.cs" />
+    <Compile Include="Models\Banner.cs">
+      <DependentUpon>BeautyCosmeticModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\BeautyCosmeticModel.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>BeautyCosmeticModel.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\BeautyCosmeticModel.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>BeautyCosmeticModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\BeautyCosmeticModel.Designer.cs">
       <DependentUpon>BeautyCosmeticModel.edmx</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Models\Category.cs" />
-    <Compile Include="Models\Order.cs" />
-    <Compile Include="Models\OrderDetail.cs" />
-    <Compile Include="Models\Product.cs" />
-    <Compile Include="Models\ProductDetail.cs" />
-    <Compile Include="Models\SkinType.cs" />
-    <Compile Include="Models\User.cs" />
+    <Compile Include="Models\Category.cs">
+      <DependentUpon>BeautyCosmeticModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Order.cs">
+      <DependentUpon>BeautyCosmeticModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\OrderDetail.cs">
+      <DependentUpon>BeautyCosmeticModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Product.cs">
+      <DependentUpon>BeautyCosmeticModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\ProductDetail.cs">
+      <DependentUpon>BeautyCosmeticModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\SkinType.cs">
+      <DependentUpon>BeautyCosmeticModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\User.cs">
+      <DependentUpon>BeautyCosmeticModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\AccountViewModels.cs" />
     <Compile Include="ViewModels\CartItem.cs" />
@@ -191,6 +215,7 @@
     <Content Include="Content\home.css" />
     <Content Include="Content\product-filter.css" />
     <Content Include="favicon.ico" />
+    <Content Include="Order_IDs_Sequence.sql" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
     <Content Include="Images\anessa.jpg" />

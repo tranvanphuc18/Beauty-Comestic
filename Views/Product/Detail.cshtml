@@ -219,7 +219,7 @@
                     <!-- Chọn phân loại -->
                     <div class="mb-3">
                         <label for="detailSelect" class="form-label font-weight-bold">Phân loại / Dung tích:</label>
-                        <select name="productDetailId" id="detailSelect" class="form-select form-control" style="max-width: 320px;">
+                        <select name="id" id="detailSelect" class="form-select form-control" style="max-width: 320px;">
                             @foreach (var d in details)
                             {
                                 decimal uPrice = nv3.Helpers.ProductHelper.UnitPrice(d);

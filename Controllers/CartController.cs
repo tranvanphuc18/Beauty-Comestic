@@ -25,16 +25,24 @@ namespace nv3.Controllers
             return Content(count > 99 ? "99+" : count.ToString());
         }
 
-        // id = ProductDetailId (biến thể sản phẩm), không phải ProductId
+        // Hỗ trợ cả parameter 'id' lẫn 'productDetailId' để không bao giờ bị lỗi màn hình vàng (Yellow Screen of Death)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Add(int id, int? quantity, string returnUrl, bool buyNow = false)
+        public ActionResult Add(int? id, int? productDetailId, int? quantity, string returnUrl, bool buyNow = false)
         {
+            int targetId = id ?? productDetailId ?? 0;
+            if (targetId <= 0)
+            {
+                TempData["Error"] = "Vui lòng chọn phân loại sản phẩm hợp lệ.";
+                return RedirectBack(returnUrl);
+            }
+
             var detail = db.ProductDetails.Include(d => d.Product)
-                           .FirstOrDefault(d => d.ProductDetailId == id);
+                           .FirstOrDefault(d => d.ProductDetailId == targetId);
             if (detail == null)
             {
-                return HttpNotFound();
+                TempData["Error"] = "Không tìm thấy thông tin sản phẩm.";
+                return RedirectBack(returnUrl);
             }
 
             string name = detail.Product.Name + " (" + detail.DetailName + ")";
@@ -52,7 +60,7 @@ namespace nv3.Controllers
             }
 
             var cart = CartHelper.GetCart();
-            var item = cart.FirstOrDefault(i => i.ProductDetailId == id);
+            var item = cart.FirstOrDefault(i => i.ProductDetailId == targetId);
             int current = item == null ? 0 : item.Quantity;
 
             if (current + qty > detail.Quantity)
@@ -71,22 +79,28 @@ namespace nv3.Controllers
                 item.Quantity += qty;
             }
 
+            TempData["Success"] = "Đã thêm \"" + name + "\" vào giỏ hàng.";
+
             if (buyNow)
             {
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", "Cart");
             }
 
-            TempData["Success"] = "Đã thêm \"" + name + "\" vào giỏ hàng.";
             return RedirectBack(returnUrl);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Update(int id, int? quantity)
+        public ActionResult Update(int? id, int? quantity)
         {
-            var detail = db.ProductDetails.Find(id);
+            if (!id.HasValue || id.Value <= 0)
+            {
+                return RedirectToAction("Index");
+            }
+
+            var detail = db.ProductDetails.Find(id.Value);
             var cart = CartHelper.GetCart();
-            var item = cart.FirstOrDefault(i => i.ProductDetailId == id);
+            var item = cart.FirstOrDefault(i => i.ProductDetailId == id.Value);
 
             if (item == null || detail == null)
             {
@@ -111,10 +125,13 @@ namespace nv3.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Remove(int id)
+        public ActionResult Remove(int? id)
         {
-            var cart = CartHelper.GetCart();
-            cart.RemoveAll(i => i.ProductDetailId == id);
+            if (id.HasValue && id.Value > 0)
+            {
+                var cart = CartHelper.GetCart();
+                cart.RemoveAll(i => i.ProductDetailId == id.Value);
+            }
             return RedirectToAction("Index");
         }
 
