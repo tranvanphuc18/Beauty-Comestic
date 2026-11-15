@@ -33,5 +33,6 @@ namespace nv3.Models
         public virtual DbSet<Product> Products { get; set; }
         public virtual DbSet<SkinType> SkinTypes { get; set; }
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<Voucher> Vouchers { get; set; }
     }
 }

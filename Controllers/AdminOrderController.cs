@@ -35,15 +35,14 @@ namespace nv3.Controllers
                 orders = orders.Where(o => o.OrderStatus == orderStatus);
             }
 
-            if (!string.IsNullOrEmpty(fromDate))
+            if (!string.IsNullOrEmpty(fromDate) && DateTime.TryParse(fromDate, out DateTime dtFrom))
             {
-                DateTime dtFrom = DateTime.Parse(fromDate);
                 orders = orders.Where(o => o.OrderDate >= dtFrom);
             }
-            if (!string.IsNullOrEmpty(toDate))
+            if (!string.IsNullOrEmpty(toDate) && DateTime.TryParse(toDate, out DateTime dtTo))
             {
-                DateTime dtTo = DateTime.Parse(toDate).AddDays(1);
-                orders = orders.Where(o => o.OrderDate < dtTo);
+                DateTime dtToLimit = dtTo.AddDays(1);
+                orders = orders.Where(o => o.OrderDate < dtToLimit);
             }
 
             int totalOrders = orders.Count();
@@ -110,7 +109,7 @@ namespace nv3.Controllers
                 return RedirectToAction("Detail", new { id = orderId });
             }
 
-            // Ràng buộc 3: Khi chuyển sang Hủy (Cancelled) -> TỰ ĐỘNG HOÀN TRẢ TỒN KHO
+            // Ràng buộc 3: Khi chuyển sang Hủy (Cancelled) -> TỰ ĐỘNG HOÀN TRẢ TỒN KHO & LƯỢT DÙNG VOUCHER
             if (oldStatus != "Cancelled" && orderStatus == "Cancelled")
             {
                 foreach (var od in order.OrderDetails)
@@ -120,6 +119,25 @@ namespace nv3.Controllers
                         od.ProductDetail.Quantity += od.Quantity;
                         od.ProductDetail.SoldQuantity = Math.Max(0, od.ProductDetail.SoldQuantity - od.Quantity);
                     }
+                }
+
+                if (!string.IsNullOrEmpty(order.ShippingAddress) && order.ShippingAddress.Contains("| Voucher: "))
+                {
+                    try
+                    {
+                        int vIdx = order.ShippingAddress.IndexOf("| Voucher: ") + 11;
+                        int endIdx = order.ShippingAddress.IndexOf(" (", vIdx);
+                        if (endIdx > vIdx)
+                        {
+                            string vCode = order.ShippingAddress.Substring(vIdx, endIdx - vIdx).Trim();
+                            var usedVoucher = db.Vouchers.FirstOrDefault(v => v.Code == vCode);
+                            if (usedVoucher != null)
+                            {
+                                usedVoucher.Quantity += 1;
+                            }
+                        }
+                    }
+                    catch { }
                 }
             }
 

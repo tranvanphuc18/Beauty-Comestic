@@ -36,14 +36,115 @@ namespace nv3.Controllers
             }
 
             var user = db.Users.Find(CurrentCustomerId);
+
+            decimal cartTotal = cart.Sum(i => i.Total);
+            string appliedCode = Session["AppliedVoucher"] as string;
+            decimal discount = 0;
+            string validCode = null;
+
+            if (!string.IsNullOrEmpty(appliedCode))
+            {
+                var vResult = VoucherHelper.ValidateAndCalculate(db, appliedCode, cartTotal);
+                if (vResult.IsValid)
+                {
+                    discount = vResult.DiscountAmount;
+                    validCode = vResult.Voucher.Code;
+                }
+                else
+                {
+                    Session["AppliedVoucher"] = null;
+                }
+            }
+
             var model = new CheckoutViewModel
             {
                 ReceiverName = user.FullName,
                 ReceiverPhone = user.Phone,
                 ShippingAddress = user.Address,
-                Items = cart
+                Items = cart,
+                VoucherCode = validCode,
+                DiscountAmount = discount
             };
             return View(model);
+        }
+
+        [HttpPost]
+        public JsonResult ApplyVoucher(string code)
+        {
+            var cart = CartHelper.Refresh(db);
+            if (!cart.Any())
+            {
+                return Json(new { success = false, message = "Giỏ hàng đang trống." });
+            }
+
+            decimal total = cart.Sum(i => i.Total);
+            var result = VoucherHelper.ValidateAndCalculate(db, code, total);
+
+            if (result.IsValid)
+            {
+                Session["AppliedVoucher"] = result.Voucher.Code;
+                return Json(new
+                {
+                    success = true,
+                    message = result.Message,
+                    code = result.Voucher.Code,
+                    discount = result.DiscountAmount,
+                    discountFormatted = result.DiscountAmount.ToString("N0") + " ₫",
+                    finalTotal = result.FinalTotal,
+                    finalTotalFormatted = result.FinalTotal.ToString("N0") + " ₫"
+                });
+            }
+
+            return Json(new { success = false, message = result.Message });
+        }
+
+        [HttpPost]
+        public JsonResult RemoveVoucher()
+        {
+            Session["AppliedVoucher"] = null;
+            var cart = CartHelper.Refresh(db);
+            decimal total = cart.Sum(i => i.Total);
+            return Json(new
+            {
+                success = true,
+                message = "Đã bỏ chọn mã giảm giá.",
+                finalTotal = total,
+                finalTotalFormatted = total.ToString("N0") + " ₫"
+            });
+        }
+
+        [HttpGet]
+        public JsonResult GetAvailableVouchers()
+        {
+            try
+            {
+                DateTime now = DateTime.Now;
+                var cart = CartHelper.Refresh(db);
+                decimal total = cart.Sum(i => i.Total);
+
+                var vouchers = db.Vouchers
+                                 .Where(v => v.IsActive && v.StartDate <= now && v.EndDate >= now && v.Quantity > 0)
+                                 .OrderByDescending(v => v.DiscountValue)
+                                 .ToList()
+                                 .Select(v => new
+                                 {
+                                     code = v.Code,
+                                     title = v.Title,
+                                     discountType = v.DiscountType,
+                                     discountValue = v.DiscountValue,
+                                     minOrder = v.MinOrderAmount,
+                                     minOrderFormatted = v.MinOrderAmount > 0 ? string.Format("{0:N0} ₫", v.MinOrderAmount) : "Không giới hạn",
+                                     maxDiscount = (v.MaxDiscountAmount.HasValue && v.MaxDiscountAmount.Value > 0) ? string.Format("{0:N0} ₫", v.MaxDiscountAmount.Value) : "",
+                                     endDate = v.EndDate.ToString("dd/MM/yyyy"),
+                                     isEligible = total >= v.MinOrderAmount
+                                 });
+
+                return Json(vouchers, JsonRequestBehavior.AllowGet);
+            }
+            catch
+            {
+                return Json(new object[0], JsonRequestBehavior.AllowGet);
+            }
         }
 
         [HttpPost]
@@ -60,6 +161,16 @@ namespace nv3.Controllers
             model.Items = cart;
             if (!ModelState.IsValid)
             {
+                string applied = Session["AppliedVoucher"] as string;
+                if (!string.IsNullOrEmpty(applied))
+                {
+                    var vResult = VoucherHelper.ValidateAndCalculate(db, applied, cart.Sum(i => i.Total));
+                    if (vResult.IsValid)
+                    {
+                        model.VoucherCode = vResult.Voucher.Code;
+                        model.DiscountAmount = vResult.DiscountAmount;
+                    }
+                }
                 return View(model);
             }
 
@@ -81,24 +192,16 @@ namespace nv3.Controllers
             string shipping = model.ReceiverName.Trim() + " - " + model.ReceiverPhone.Trim()
                               + " - " + model.ShippingAddress.Trim();
 
-            var order = new Order
-            {
-                UserId = CurrentCustomerId,
-                OrderDate = DateTime.Now,
-                OrderStatus = DefaultOrderStatus,
-                PaymentMethod = DefaultPaymentMethod,
-                PaymentStatus = DefaultPaymentStatus,
-                ShippingAddress = shipping
-            };
-
             decimal total = 0;
+            var orderDetailsList = new System.Collections.Generic.List<OrderDetail>();
+
             foreach (var item in cart)
             {
                 var d = details[item.ProductDetailId];
                 decimal unitPrice = ProductHelper.UnitPrice(d);
                 decimal lineTotal = unitPrice * item.Quantity;
 
-                order.OrderDetails.Add(new OrderDetail
+                orderDetailsList.Add(new OrderDetail
                 {
                     ProductDetailId = d.ProductDetailId,
                     Quantity = item.Quantity,
@@ -110,7 +213,41 @@ namespace nv3.Controllers
                 d.SoldQuantity += item.Quantity;
                 total += lineTotal;
             }
-            order.TotalAmount = total;
+
+            // Áp dụng Voucher nếu hợp lệ
+            string appliedCode = Session["AppliedVoucher"] as string;
+            if (!string.IsNullOrEmpty(appliedCode))
+            {
+                var vResult = VoucherHelper.ValidateAndCalculate(db, appliedCode, total);
+                if (vResult.IsValid)
+                {
+                    total = vResult.FinalTotal;
+                    vResult.Voucher.Quantity = Math.Max(0, vResult.Voucher.Quantity - 1);
+                    shipping += string.Format(" | Voucher: {0} (-{1:N0}đ)", vResult.Voucher.Code, vResult.DiscountAmount);
+                }
+                Session["AppliedVoucher"] = null;
+            }
+
+            if (shipping.Length > 300)
+            {
+                shipping = shipping.Substring(0, 300);
+            }
+
+            var order = new Order
+            {
+                UserId = CurrentCustomerId,
+                OrderDate = DateTime.Now,
+                OrderStatus = DefaultOrderStatus,
+                PaymentMethod = DefaultPaymentMethod,
+                PaymentStatus = DefaultPaymentStatus,
+                ShippingAddress = shipping,
+                TotalAmount = total
+            };
+
+            foreach (var od in orderDetailsList)
+            {
+                order.OrderDetails.Add(od);
+            }
 
             db.Orders.Add(order);
             db.SaveChanges();
@@ -169,6 +306,26 @@ namespace nv3.Controllers
                     line.ProductDetail.Quantity += line.Quantity;
                     line.ProductDetail.SoldQuantity = Math.Max(0, line.ProductDetail.SoldQuantity - line.Quantity);
                 }
+            }
+
+            // Hoàn lại 1 lượt sử dụng cho Voucher nếu đơn hàng có áp dụng mã
+            if (!string.IsNullOrEmpty(order.ShippingAddress) && order.ShippingAddress.Contains("| Voucher: "))
+            {
+                try
+                {
+                    int vIdx = order.ShippingAddress.IndexOf("| Voucher: ") + 11;
+                    int endIdx = order.ShippingAddress.IndexOf(" (", vIdx);
+                    if (endIdx > vIdx)
+                    {
+                        string vCode = order.ShippingAddress.Substring(vIdx, endIdx - vIdx).Trim();
+                        var usedVoucher = db.Vouchers.FirstOrDefault(v => v.Code == vCode);
+                        if (usedVoucher != null)
+                        {
+                            usedVoucher.Quantity += 1;
+                        }
+                    }
+                }
+                catch { }
             }
 
             db.SaveChanges();

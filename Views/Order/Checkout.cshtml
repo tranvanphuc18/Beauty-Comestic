@@ -1,65 +1,364 @@
 ﻿@model nv3.ViewModels.CheckoutViewModel
-
 @{
     ViewBag.Title = "Thanh toán";
 }
 
 <section class="container py-5">
-    <h2 class="mb-4">Thanh toán</h2>
+    <h2 class="mb-4 fw-bold text-dark"><i class="fas fa-credit-card text-danger me-2"></i>Thanh toán đơn hàng</h2>
 
     @if (!ViewData.ModelState.IsValid)
     {
-        <div class="alert alert-danger">
+        <div class="alert alert-danger shadow-sm">
             @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
             {
-                <div>@err.ErrorMessage</div>
+                <div><i class="fas fa-exclamation-triangle me-1"></i>@err.ErrorMessage</div>
             }
         </div>
     }
 
     <div class="row g-4">
+        <!-- Cột thông tin nhận hàng -->
         <div class="col-lg-7">
-            @using (Html.BeginForm("Checkout", "Order", FormMethod.Post))
-            {
-                @Html.AntiForgeryToken()
+            <div class="card p-4 rounded-3 shadow-sm border bg-white mb-4">
+                <h5 class="fw-bold mb-3 pb-2 border-bottom text-dark">
+                    <i class="fas fa-map-marker-alt text-danger me-2"></i>Thông tin người nhận
+                </h5>
 
-                <div class="mb-3">
-                    <label class="form-label" for="ReceiverName">Tên người nhận</label>
-                    <input type="text" class="form-control" id="ReceiverName" name="ReceiverName"
-                           value="@Model.ReceiverName" maxlength="100" required />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="ReceiverPhone">Số điện thoại</label>
-                    <input type="tel" class="form-control" id="ReceiverPhone" name="ReceiverPhone"
-                           value="@Model.ReceiverPhone" pattern="0[0-9]{9}" required />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="ShippingAddress">Địa chỉ giao hàng</label>
-                    <input type="text" class="form-control" id="ShippingAddress" name="ShippingAddress"
-                           value="@Model.ShippingAddress" maxlength="150" required />
-                </div>
-                <p class="text-muted">Hình thức thanh toán: thanh toán khi nhận hàng (COD).</p>
-
-                <button type="submit" class="btn btn-danger">Xác nhận đặt hàng</button>
-                <a href="@Url.Action("Index", "Cart")" class="btn btn-outline-secondary">Quay lại giỏ hàng</a>
-            }
-        </div>
-
-        <div class="col-lg-5">
-            <div class="border rounded-3 p-3">
-                <h5>Đơn hàng của bạn</h5>
-                @foreach (var item in Model.Items)
+                @using (Html.BeginForm("Checkout", "Order", FormMethod.Post, new { id = "checkoutForm" }))
                 {
-                    <div class="d-flex justify-content-between border-bottom py-2">
-                        <span>@item.ProductName (@item.DetailName) × @item.Quantity</span>
-                        <span>@item.Total.ToString("N0") ₫</span>
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold" for="ReceiverName">Họ và tên người nhận <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="ReceiverName" name="ReceiverName"
+                               value="@Model.ReceiverName" maxlength="100" placeholder="Ví dụ: Nguyễn Văn A" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold" for="ReceiverPhone">Số điện thoại liên hệ <span class="text-danger">*</span></label>
+                        <input type="tel" class="form-control" id="ReceiverPhone" name="ReceiverPhone"
+                               value="@Model.ReceiverPhone" pattern="0[0-9]{9}" placeholder="Ví dụ: 0912345678" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold" for="ShippingAddress">Địa chỉ nhận hàng chi tiết <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="ShippingAddress" name="ShippingAddress"
+                               value="@Model.ShippingAddress" maxlength="150" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố" required />
+                    </div>
+
+                    <div class="p-3 mb-4 rounded-3 border bg-light">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-truck text-success fs-4 me-3"></i>
+                            <div>
+                                <strong class="d-block text-dark">Phương thức thanh toán</strong>
+                                <small class="text-muted">Thanh toán tiền mặt khi nhận hàng (COD). Được kiểm tra hàng trước khi thanh toán.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger px-4 py-2 font-weight-bold">
+                            <i class="fas fa-check-circle me-1"></i> Xác nhận đặt hàng
+                        </button>
+                        <a href="@Url.Action("Index", "Cart")" class="btn btn-outline-secondary px-3 py-2">
+                            <i class="fas fa-arrow-left me-1"></i> Quay lại giỏ hàng
+                        </a>
                     </div>
                 }
-                <div class="d-flex justify-content-between pt-3">
-                    <strong>Tổng tiền</strong>
-                    <strong>@Model.Total.ToString("N0") ₫</strong>
+            </div>
+        </div>
+
+        <!-- Cột tóm tắt đơn hàng & Voucher -->
+        <div class="col-lg-5">
+            <div class="card p-4 rounded-3 shadow-sm border bg-white">
+                <h5 class="fw-bold mb-3 pb-2 border-bottom text-dark">
+                    <i class="fas fa-shopping-bag text-danger me-2"></i>Đơn hàng của bạn (@Model.Items.Count sản phẩm)
+                </h5>
+
+                <!-- Danh sách sản phẩm -->
+                <div class="mb-3" style="max-height: 250px; overflow-y: auto;">
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                            <div class="d-flex align-items-center gap-2" style="max-width: 70%;">
+                                <img src="@Url.Content("~/Images/" + item.Image)" alt="@item.ProductName"
+                                     style="width: 45px; height: 45px; object-fit: contain; border-radius: 6px; border: 1px solid #eee; padding: 2px;" />
+                                <div class="text-truncate">
+                                    <strong class="d-block text-truncate small" title="@item.ProductName">@item.ProductName</strong>
+                                    <small class="text-muted">@item.DetailName × @item.Quantity</small>
+                                </div>
+                            </div>
+                            <span class="font-weight-bold text-nowrap">@item.Total.ToString("N0") ₫</span>
+                        </div>
+                    }
+                </div>
+
+                <!-- KHỐI MÃ KHUYẾN MÃI / VOUCHER -->
+                <div class="p-3 mb-3 rounded-3" style="background: #FFF8FA; border: 1px solid #F5DDE6;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <strong class="text-dark small text-uppercase" style="letter-spacing: 0.5px;">
+                            <i class="fas fa-ticket-alt text-danger me-1"></i> Khuyến mãi / Voucher
+                        </strong>
+                        <a href="javascript:void(0)" id="btnOpenVoucherModal" class="small text-danger font-weight-bold text-decoration-none">
+                            <i class="fas fa-tags me-1"></i>Chọn Voucher
+                        </a>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" id="voucherCodeInput" class="form-control text-uppercase font-weight-bold"
+                               placeholder="Nhập mã voucher..." style="letter-spacing: 1px;"
+                               value="@(Model.VoucherCode ?? "")" />
+                        <button type="button" id="btnApplyVoucher" class="btn btn-danger font-weight-bold">
+                            Áp dụng
+                        </button>
+                    </div>
+
+                    <!-- Gợi ý mã mẫu -->
+                    <div class="mt-2 text-muted" style="font-size: 0.83rem;">
+                        <i class="fas fa-lightbulb text-warning me-1"></i>Ví dụ: Nhập mã <a href="javascript:void(0)" class="quick-code-hint fw-bold text-danger text-decoration-underline" data-code="CHAOBANMOI" title="Nhấp để tự động điền mã">CHAOBANMOI</a> để giảm 15%
+                    </div>
+
+                    <div id="voucherMsg" class="small mt-1" style="display: none;"></div>
+
+                    <!-- Hộp hiển thị Voucher đã chọn -->
+                    <div id="appliedVoucherBox" class="@(string.IsNullOrEmpty(Model.VoucherCode) ? "d-none" : "") mt-2 p-2 rounded bg-white border border-success d-flex justify-content-between align-items-center">
+                        <div class="text-truncate me-2">
+                            <span class="badge bg-success me-1"><i class="fas fa-check me-1"></i>Đã áp dụng</span>
+                            <strong id="appliedVoucherText" class="text-success">@Model.VoucherCode</strong>
+                        </div>
+                        <button type="button" id="btnRemoveVoucher" class="btn btn-sm btn-link text-danger p-0 text-decoration-none font-weight-bold">
+                            <i class="fas fa-times me-1"></i>Bỏ chọn
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bảng chi tiết giá tiền -->
+                <div class="border-top pt-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Tạm tính:</span>
+                        <strong id="subTotalText">@Model.Total.ToString("N0") ₫</strong>
+                    </div>
+
+                    <div id="discountRow" class="d-flex justify-content-between mb-2 text-success @(Model.DiscountAmount > 0 ? "" : "d-none")">
+                        <span>Giảm giá Voucher:</span>
+                        <strong id="discountAmountText">-@Model.DiscountAmount.ToString("N0") ₫</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Phí giao hàng:</span>
+                        <span class="text-success font-weight-bold">Miễn phí</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between pt-3 border-top mt-2">
+                        <strong class="fs-6 text-dark">Tổng thanh toán:</strong>
+                        <strong id="finalTotalText" class="text-danger fs-4">@Model.FinalTotal.ToString("N0") ₫</strong>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<!-- MODAL DANH SÁCH VOUCHER KHẢ DỤNG -->
+<div class="modal fade" id="voucherModal" tabindex="-1" aria-labelledby="voucherModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-dark" id="voucherModalTitle">
+                    <i class="fas fa-ticket-alt text-danger me-2"></i>Kho Voucher của bạn
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body p-3">
+                <div id="voucherListContainer">
+                    <div class="text-center py-4 text-muted">
+                        <div class="spinner-border text-danger spinner-border-sm me-2" role="status"></div>
+                        Đang tải danh sách voucher khả dụng...
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .voucher-card {
+        border: 1px dashed #E91E63;
+        border-radius: 12px;
+        background: #FFF9FA;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .voucher-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(233, 30, 99, 0.12);
+    }
+    .voucher-tag {
+        background: #E91E63;
+        color: #fff;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 13px;
+    }
+</style>
+
+@section Scripts {
+<script>
+    (function () {
+        var btnApply = document.getElementById('btnApplyVoucher');
+        var btnRemove = document.getElementById('btnRemoveVoucher');
+        var inputCode = document.getElementById('voucherCodeInput');
+        var msgBox = document.getElementById('voucherMsg');
+        var appliedBox = document.getElementById('appliedVoucherBox');
+        var appliedText = document.getElementById('appliedVoucherText');
+        var discountRow = document.getElementById('discountRow');
+        var discountText = document.getElementById('discountAmountText');
+        var finalTotalText = document.getElementById('finalTotalText');
+        var btnOpenModal = document.getElementById('btnOpenVoucherModal');
+        var listContainer = document.getElementById('voucherListContainer');
+
+        function showMsg(text, isError) {
+            msgBox.textContent = text;
+            msgBox.className = 'small mt-1 ' + (isError ? 'text-danger font-weight-bold' : 'text-success font-weight-bold');
+            msgBox.style.display = 'block';
+        }
+
+        function clearMsg() {
+            msgBox.textContent = '';
+            msgBox.style.display = 'none';
+        }
+
+        // Bấm vào gợi ý mã để tự động điền vào ô nhập
+        document.querySelectorAll('.quick-code-hint').forEach(function (el) {
+            el.addEventListener('click', function () {
+                var code = this.getAttribute('data-code');
+                inputCode.value = code;
+                inputCode.focus();
+            });
+        });
+
+        // 1. Áp dụng mã Voucher
+        btnApply.addEventListener('click', function () {
+            var code = (inputCode.value || '').trim();
+            if (!code) {
+                showMsg('Vui lòng nhập mã voucher.', true);
+                return;
+            }
+            clearMsg();
+            btnApply.disabled = true;
+
+            var fd = new FormData();
+            fd.append('code', code);
+
+            fetch('@Url.Action("ApplyVoucher", "Order")', {
+                method: 'POST',
+                body: fd
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                btnApply.disabled = false;
+                if (res.success) {
+                    showMsg(res.message, false);
+                    appliedBox.classList.remove('d-none');
+                    appliedText.textContent = res.code;
+                    inputCode.value = res.code;
+
+                    discountRow.classList.remove('d-none');
+                    discountText.textContent = '-' + res.discountFormatted;
+                    finalTotalText.textContent = res.finalTotalFormatted;
+
+                    // Đóng modal nếu đang mở
+                    var modalEl = document.getElementById('voucherModal');
+                    var modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                } else {
+                    showMsg(res.message, true);
+                }
+            })
+            .catch(function () {
+                btnApply.disabled = false;
+                showMsg('Lỗi kết nối máy chủ. Vui lòng thử lại.', true);
+            });
+        });
+
+        // 2. Hủy mã Voucher
+        btnRemove.addEventListener('click', function () {
+            fetch('@Url.Action("RemoveVoucher", "Order")', {
+                method: 'POST'
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (res.success) {
+                    clearMsg();
+                    appliedBox.classList.add('d-none');
+                    appliedText.textContent = '';
+                    inputCode.value = '';
+
+                    discountRow.classList.add('d-none');
+                    discountText.textContent = '-0 ₫';
+                    finalTotalText.textContent = res.finalTotalFormatted;
+                }
+            });
+        });
+
+        // 3. Mở Modal & Tải danh sách Voucher
+        btnOpenModal.addEventListener('click', function () {
+            var modal = new bootstrap.Modal(document.getElementById('voucherModal'));
+            modal.show();
+
+            fetch('@Url.Action("GetAvailableVouchers", "Order")')
+            .then(function (r) { return r.json(); })
+            .then(function (items) {
+                if (!items || items.length === 0) {
+                    listContainer.innerHTML = '<div class="text-center py-4 text-muted">Hiện chưa có mã voucher nào đang diễn ra.</div>';
+                    return;
+                }
+
+                var html = '';
+                items.forEach(function (v) {
+                    var discountBadge = v.discountType === 'Percent' ? ('GIẢM ' + v.discountValue + '%') : ('GIẢM ' + v.discountValue.toLocaleString('vi-VN') + ' đ');
+                    var maxText = v.maxDiscount ? (' (Tối đa ' + v.maxDiscount + ')') : '';
+
+                    html += '<div class="voucher-card p-3 mb-3 d-flex justify-content-between align-items-center gap-3">';
+                    html += '  <div class="d-flex align-items-center gap-3" style="max-width: 70%;">';
+                    html += '    <div class="voucher-tag text-center text-nowrap">' + discountBadge + '</div>';
+                    html += '    <div>';
+                    html += '      <strong class="d-block text-dark">' + v.title + maxText + '</strong>';
+                    html += '      <small class="text-muted d-block">Đơn tối thiểu: <strong>' + v.minOrderFormatted + '</strong></small>';
+                    html += '      <small class="text-secondary"><i class="fas fa-clock me-1"></i>HSD: ' + v.endDate + '</small>';
+                    html += '    </div>';
+                    html += '  </div>';
+
+                    if (v.isEligible) {
+                        html += '  <button type="button" class="btn btn-outline-danger btn-sm font-weight-bold btn-select-voucher" data-code="' + v.code + '">';
+                        html += '    Áp dụng';
+                        html += '  </button>';
+                    } else {
+                        html += '  <button type="button" class="btn btn-secondary btn-sm" disabled style="opacity: 0.6; font-size: 11px;">';
+                        html += '    Chưa đủ điều kiện';
+                        html += '  </button>';
+                    }
+                    html += '</div>';
+                });
+
+                listContainer.innerHTML = html;
+
+                // Gán sự kiện click nút áp dụng trong modal
+                listContainer.querySelectorAll('.btn-select-voucher').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var code = this.getAttribute('data-code');
+                        inputCode.value = code;
+                        btnApply.click();
+                    });
+                });
+            })
+            .catch(function () {
+                listContainer.innerHTML = '<div class="text-center py-4 text-danger">Không thể tải danh sách voucher.</div>';
+            });
+        });
+    })();
+</script>
+}

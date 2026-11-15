@@ -1,0 +1,124 @@
+@model nv3.Models.Voucher
+@{
+    ViewBag.Title = "Chỉnh sửa mã Voucher " + Model.Code;
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card p-4 col-lg-8 mx-auto shadow-sm">
+    <div class="d-flex align-items-center mb-3">
+        <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-sm mr-3">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+        <h4 class="m-0 text-primary"><i class="fas fa-edit mr-2"></i>Chỉnh sửa Voucher: @Model.Code</h4>
+    </div>
+    <hr />
+
+    @using (Html.BeginForm("Edit", "AdminVoucher", FormMethod.Post, new { id = "voucherForm" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.VoucherId)
+        @Html.HiddenFor(m => m.CreatedAt)
+
+        if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                @Html.ValidationSummary(false, "Vui lòng kiểm tra lại thông tin:")
+            </div>
+        }
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label class="font-weight-bold">Mã Voucher <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.Code, new { @class = "form-control text-uppercase font-weight-bold", required = "required", style = "letter-spacing: 1px;" })
+                <small class="form-text text-muted">Chỉ gồm chữ cái viết hoa, số và dấu gạch nối.</small>
+            </div>
+
+            <div class="form-group col-md-6">
+                <label class="font-weight-bold">Số lượng phát hành <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.Quantity, new { @class = "form-control", type = "number", min = "0", max = "100000", required = "required" })
+                <small class="form-text text-muted">Số lượt có thể sử dụng voucher này.</small>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="font-weight-bold">Tiêu đề / Tên chương trình <span class="text-danger">*</span></label>
+            @Html.TextBoxFor(m => m.Title, new { @class = "form-control", required = "required" })
+        </div>
+
+        <div class="form-row bg-light p-3 rounded mb-3 border">
+            <div class="form-group col-md-4">
+                <label class="font-weight-bold">Loại giảm giá <span class="text-danger">*</span></label>
+                @Html.DropDownListFor(m => m.DiscountType, new List<SelectListItem>
+                {
+                    new SelectListItem { Text = "Giảm theo phần trăm (%)", Value = "Percent" },
+                    new SelectListItem { Text = "Giảm số tiền cố định (VNĐ)", Value = "FixedAmount" }
+                }, new { @class = "form-control", id = "discountTypeSelect" })
+            </div>
+
+            <div class="form-group col-md-4">
+                <label class="font-weight-bold" id="discountValueLabel">Giá trị giảm (%) <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.DiscountValue, new { @class = "form-control", type = "number", step = "any", min = "1", required = "required", id = "discountValueInput" })
+            </div>
+
+            <div class="form-group col-md-4" id="maxDiscountGroup">
+                <label class="font-weight-bold">Giảm tối đa (VNĐ)</label>
+                @Html.TextBoxFor(m => m.MaxDiscountAmount, new { @class = "form-control", type = "number", step = "1000", placeholder = "Để trống nếu không giới hạn" })
+                <small class="form-text text-muted">Áp dụng cho giảm theo %.</small>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="font-weight-bold">Giá trị đơn hàng tối thiểu (VNĐ)</label>
+            @Html.TextBoxFor(m => m.MinOrderAmount, new { @class = "form-control", type = "number", step = "1000", min = "0" })
+            <small class="form-text text-muted">Đơn hàng phải đạt giá trị này mới áp dụng được voucher (nhập 0 nếu không yêu cầu).</small>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label class="font-weight-bold">Ngày bắt đầu <span class="text-danger">*</span></label>
+                <input type="date" name="StartDate" class="form-control"
+                       value="@(Model.StartDate.ToString("yyyy-MM-dd"))" required />
+            </div>
+
+            <div class="form-group col-md-6">
+                <label class="font-weight-bold">Ngày kết thúc <span class="text-danger">*</span></label>
+                <input type="date" name="EndDate" class="form-control"
+                       value="@(Model.EndDate.ToString("yyyy-MM-dd"))" required />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="custom-control custom-checkbox">
+                @Html.CheckBoxFor(m => m.IsActive, new { @class = "custom-control-input", id = "isActiveCheck" })
+                <label class="custom-control-label font-weight-bold" for="isActiveCheck">Kích hoạt (cho phép khách hàng sử dụng)</label>
+            </div>
+        </div>
+
+        <div class="mt-4 border-top pt-3">
+            <button type="submit" class="btn btn-primary px-4 font-weight-bold mr-2">
+                <i class="fas fa-save mr-1"></i> Cập nhật Voucher
+            </button>
+            <a href="@Url.Action("Index")" class="btn btn-secondary">Hủy bỏ</a>
+        </div>
+    }
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var select = document.getElementById('discountTypeSelect');
+        var label = document.getElementById('discountValueLabel');
+        var maxGroup = document.getElementById('maxDiscountGroup');
+
+        function updateUI() {
+            if (select.value === 'Percent') {
+                label.innerHTML = 'Giá trị giảm (%) <span class="text-danger">*</span>';
+                maxGroup.style.display = 'block';
+            } else {
+                label.innerHTML = 'Số tiền giảm (VNĐ) <span class="text-danger">*</span>';
+                maxGroup.style.display = 'none';
+            }
+        }
+        select.addEventListener('change', updateUI);
+        updateUI();
+    });
+</script>

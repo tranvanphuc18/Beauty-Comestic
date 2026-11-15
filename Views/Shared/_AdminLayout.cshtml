@@ -108,6 +108,11 @@
                 </a>
             </li>
             <li>
+                <a href="@Url.Action("Index", "AdminVoucher")" class="@(ViewContext.RouteData.Values["controller"].ToString() == "AdminVoucher" ? "active" : "")">
+                    <i class="fas fa-ticket-alt"></i> Quản lý Voucher
+                </a>
+            </li>
+            <li>
                 <a href="@Url.Action("Customers", "AdminUser")" class="@(ViewContext.RouteData.Values["action"].ToString() == "Customers" ? "active" : "")">
                     <i class="fas fa-users"></i> Quản lý khách hàng
                 </a>

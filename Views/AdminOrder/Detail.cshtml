@@ -78,6 +78,23 @@
             }
         </tbody>
         <tfoot>
+            @{
+                decimal subTotal = Model.OrderDetails.Sum(d => d.LineTotal);
+                decimal voucherDiscount = subTotal - Model.TotalAmount;
+            }
+            @if (voucherDiscount > 0)
+            {
+                <tr>
+                    <td colspan="5" class="text-right text-muted">Tiền hàng (Tạm tính):</td>
+                    <td class="text-dark font-weight-bold">@string.Format("{0:N0} đ", subTotal)</td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="text-right text-success">
+                        <i class="fas fa-ticket-alt"></i> Giảm giá Voucher:
+                    </td>
+                    <td class="text-success font-weight-bold">-@string.Format("{0:N0} đ", voucherDiscount)</td>
+                </tr>
+            }
             <tr>
                 <td colspan="5" class="text-right font-weight-bold">TỔNG CỘNG HÓA ĐƠN:</td>
                 <td class="text-danger font-weight-bold" style="font-size: 1.2rem;">@string.Format("{0:N0} đ", Model.TotalAmount)</td>

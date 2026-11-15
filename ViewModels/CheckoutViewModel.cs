@@ -25,5 +25,12 @@ namespace nv3.ViewModels
         {
             get { return Items == null ? 0 : Items.Sum(i => i.Total); }
         }
+
+        public string VoucherCode { get; set; }
+        public decimal DiscountAmount { get; set; }
+        public decimal FinalTotal
+        {
+            get { return System.Math.Max(0, Total - DiscountAmount); }
+        }
     }
 }
