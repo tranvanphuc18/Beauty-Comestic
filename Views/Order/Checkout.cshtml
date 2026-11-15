@@ -46,12 +46,81 @@
                                value="@Model.ShippingAddress" maxlength="150" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố" required />
                     </div>
 
-                    <div class="p-3 mb-4 rounded-3 border bg-light">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-truck text-success fs-4 me-3"></i>
-                            <div>
-                                <strong class="d-block text-dark">Phương thức thanh toán</strong>
-                                <small class="text-muted">Thanh toán tiền mặt khi nhận hàng (COD). Được kiểm tra hàng trước khi thanh toán.</small>
+                    <div class="mb-4">
+                        <label class="form-label font-weight-bold mb-2">
+                            <i class="fas fa-credit-card text-danger me-1"></i>Phương thức thanh toán <span class="text-danger">*</span>
+                        </label>
+
+                        <!-- Card 1: COD -->
+                        <div class="payment-option-card border rounded-3 p-3 mb-2 d-flex align-items-start gap-3"
+                             id="card-COD" style="cursor: pointer; border-color: #E91E63 !important; background: #FFF8FA;">
+                            <input type="radio" name="PaymentMethod" id="pm-cod" value="COD"
+                                   checked class="mt-1" style="accent-color: #E91E63;" />
+                            <label for="pm-cod" style="cursor: pointer; flex: 1;" class="mb-0">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <i class="fas fa-truck text-success fs-5"></i>
+                                    <strong class="text-dark">Thanh toán khi nhận hàng (COD)</strong>
+                                </div>
+                                <small class="text-muted">Trả tiền mặt khi nhận hàng. Được kiểm tra hàng trước khi thanh toán.</small>
+                            </label>
+                        </div>
+
+                        <!-- Card 2: Chuyển khoản -->
+                        <div class="payment-option-card border rounded-3 p-3 d-flex align-items-start gap-3"
+                             id="card-BankTransfer" style="cursor: pointer;">
+                            <input type="radio" name="PaymentMethod" id="pm-bank" value="BankTransfer"
+                                   class="mt-1" style="accent-color: #E91E63;" />
+                            <label for="pm-bank" style="cursor: pointer; flex: 1;" class="mb-0">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <i class="fas fa-university text-primary fs-5"></i>
+                                    <strong class="text-dark">Chuyển khoản ngân hàng (Trả trước)</strong>
+                                </div>
+                                <small class="text-muted">Thanh toán trước qua tài khoản ngân hàng. Đơn hàng sẽ được xử lý sau khi xác nhận thanh toán.</small>
+                            </label>
+                        </div>
+
+                        <!-- Khung thông tin chuyển khoản (ẩn/hiện theo lựa chọn) -->
+                        <div id="bankTransferInfo" class="mt-3 p-3 rounded-3 border" style="display: none; border-color: #1a73e8 !important; background: #F0F7FF;">
+                            <div class="d-flex align-items-center gap-2 mb-3 pb-2" style="border-bottom: 1px dashed #90CAF9;">
+                                <i class="fas fa-info-circle text-primary"></i>
+                                <strong class="text-primary">Thông tin tài khoản nhận tiền</strong>
+                            </div>
+                            <div class="row g-2" style="font-size: 14px;">
+                                <div class="col-5 text-muted">Ngân hàng:</div>
+                                <div class="col-7 fw-bold text-dark">MBBank (Ngân hàng Quân Đội)</div>
+
+                                <div class="col-5 text-muted">Chủ tài khoản:</div>
+                                <div class="col-7 fw-bold text-dark text-uppercase">TRAN KHANH VINH</div>
+
+                                <div class="col-5 text-muted">Số tài khoản:</div>
+                                <div class="col-7">
+                                    <span class="fw-bold text-danger fs-5" id="bankAccountNum" style="letter-spacing: 0.5px;">0768873317</span>
+                                    <button type="button" class="btn btn-sm btn-outline-danger ms-2 py-0 px-2"
+                                            onclick="copyBankNumber()" title="Sao chép số tài khoản">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+
+                                <div class="col-5 text-muted">Nội dung CK:</div>
+                                <div class="col-7">
+                                    <span class="fw-bold text-primary" id="transferContent">BEAUTY [Họ tên] [SĐT]</span>
+                                </div>
+
+                                <div class="col-5 text-muted">Số tiền:</div>
+                                <div class="col-7 fw-bold text-danger fs-5" id="transferAmount">@Model.FinalTotal.ToString("N0") ₫</div>
+                            </div>
+                            <div class="alert alert-warning mt-3 mb-0 py-2 px-3 small">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                Vui lòng chuyển khoản <strong>đúng số tiền và nội dung</strong> để đơn hàng được xác nhận nhanh nhất.
+                                Đơn hàng sẽ được nhân viên duyệt sau khi nhận được thông báo chuyển khoản.
+                            </div>
+                            <div class="text-center mt-3">
+                                <img id="qrCodeImg"
+                                     src="https://img.vietqr.io/image/MB-0768873317-compact2.png?amount=@((int)Model.FinalTotal)&addInfo=BEAUTY%20THANH%20TOAN&accountName=TRAN%20KHANH%20VINH"
+                                     alt="QR Chuyển khoản MBBank"
+                                     style="max-width: 230px; width: 100%; border: 2px solid #1a73e8; border-radius: 12px; padding: 6px; background: #fff;"
+                                     onerror="this.onerror=null; this.src='@Url.Content("~/Images/mbbank-qr.jpg")';" />
+                                <div class="text-muted small mt-2"><i class="fas fa-qrcode me-1"></i>Quét mã QR bằng ứng dụng ngân hàng bất kỳ để thanh toán nhanh</div>
                             </div>
                         </div>
                     </div>
@@ -203,6 +272,17 @@
         font-weight: 700;
         font-size: 13px;
     }
+    .payment-option-card {
+        transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+    .payment-option-card:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .payment-option-card.selected-payment {
+        border-color: #E91E63 !important;
+        background: #FFF8FA !important;
+        box-shadow: 0 0 0 2px rgba(233,30,99,0.15);
+    }
 </style>
 
 @section Scripts {
@@ -219,6 +299,53 @@
         var finalTotalText = document.getElementById('finalTotalText');
         var btnOpenModal = document.getElementById('btnOpenVoucherModal');
         var listContainer = document.getElementById('voucherListContainer');
+        var bankTransferInfo = document.getElementById('bankTransferInfo');
+        var transferAmountEl = document.getElementById('transferAmount');
+        var qrCodeImg = document.getElementById('qrCodeImg');
+        var cardCOD = document.getElementById('card-COD');
+        var cardBank = document.getElementById('card-BankTransfer');
+
+        // ======= THANH TOÁN: Bật/Tắt card & khung ngân hàng =======
+        function updatePaymentUI(selected) {
+            if (selected === 'BankTransfer') {
+                cardBank.classList.add('selected-payment');
+                cardCOD.classList.remove('selected-payment');
+                bankTransferInfo.style.display = 'block';
+            } else {
+                cardCOD.classList.add('selected-payment');
+                cardBank.classList.remove('selected-payment');
+                bankTransferInfo.style.display = 'none';
+            }
+        }
+        // Khởi tạo trạng thái mặc định
+        updatePaymentUI('COD');
+
+        cardCOD.addEventListener('click', function () {
+            document.getElementById('pm-cod').checked = true;
+            updatePaymentUI('COD');
+        });
+        cardBank.addEventListener('click', function () {
+            document.getElementById('pm-bank').checked = true;
+            updatePaymentUI('BankTransfer');
+        });
+
+        // Hàm cập nhật số tiền + QR khi áp dụng/xóa voucher
+        function updateBankAmount(amountStr, amountNum) {
+            if (transferAmountEl) transferAmountEl.textContent = amountStr;
+            if (qrCodeImg) {
+                qrCodeImg.src = 'https://img.vietqr.io/image/MB-0768873317-compact2.png?amount='
+                    + Math.round(amountNum)
+                    + '&addInfo=BEAUTY%20THANH%20TOAN&accountName=TRAN%20KHANH%20VINH';
+            }
+        }
+
+        // Sao chép số tài khoản
+        window.copyBankNumber = function () {
+            var txt = document.getElementById('bankAccountNum').textContent.replace(/\s/g, '');
+            navigator.clipboard.writeText(txt).then(function () {
+                alert('Đã sao chép số tài khoản: ' + txt);
+            });
+        };
 
         function showMsg(text, isError) {
             msgBox.textContent = text;
@@ -269,6 +396,7 @@
                     discountRow.classList.remove('d-none');
                     discountText.textContent = '-' + res.discountFormatted;
                     finalTotalText.textContent = res.finalTotalFormatted;
+                    updateBankAmount(res.finalTotalFormatted, res.finalTotal);
 
                     // Đóng modal nếu đang mở
                     var modalEl = document.getElementById('voucherModal');
@@ -300,6 +428,7 @@
                     discountRow.classList.add('d-none');
                     discountText.textContent = '-0 ₫';
                     finalTotalText.textContent = res.finalTotalFormatted;
+                    updateBankAmount(res.finalTotalFormatted, res.finalTotal);
                 }
             });
         });

@@ -32,5 +32,9 @@ namespace nv3.ViewModels
         {
             get { return System.Math.Max(0, Total - DiscountAmount); }
         }
+
+        // Phương thức thanh toán: "COD" hoặc "BankTransfer"
+        [Required(ErrorMessage = "Vui lòng chọn phương thức thanh toán.")]
+        public string PaymentMethod { get; set; } = "COD";
     }
 }

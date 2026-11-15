@@ -22,7 +22,7 @@
         <div class="col-md-6 text-md-right">
             <h5 class="text-muted">Thông tin thanh toán:</h5>
             <p class="mb-1"><strong>Ngày đặt:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
-            <p class="mb-1"><strong>Phương thức:</strong> @Model.PaymentMethod</p>
+            <p class="mb-1"><strong>Phương thức:</strong> <span class="badge @(Model.PaymentMethod == "BankTransfer" ? "badge-info" : "badge-secondary")">@(Model.PaymentMethod == "BankTransfer" ? "Chuyển khoản MBBank" : "COD")</span></p>
             <p class="mb-1"><strong>Trạng thái thanh toán:</strong> <span class="badge badge-secondary">@Model.PaymentStatus</span></p>
             <p class="mb-1"><strong>Trạng thái đơn hàng:</strong> <span class="badge badge-primary">@Model.OrderStatus</span></p>
         </div>

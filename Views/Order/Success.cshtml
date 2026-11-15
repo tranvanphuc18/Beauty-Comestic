@@ -5,12 +5,62 @@
 }
 
 <section class="container py-5 text-center">
-    <h2 class="mb-3">🎉 Đặt hàng thành công!</h2>
-    <p>Mã đơn hàng của bạn: <strong>#@Model.OrderId</strong></p>
-    <p>Tổng tiền: <strong>@Model.TotalAmount.ToString("N0") ₫</strong></p>
-    <p class="text-muted">Cảm ơn bạn đã mua sắm tại BeautyCosmetic.</p>
+    <div class="mb-4">
+        <span class="d-inline-flex align-items-center justify-content-center bg-success text-white rounded-circle shadow-sm" style="width: 70px; height: 70px; font-size: 32px;">
+            ✓
+        </span>
+    </div>
+    <h2 class="mb-2 fw-bold text-dark">Đặt hàng thành công!</h2>
+    <p class="text-muted mb-4">Cảm ơn bạn đã tin tưởng mua sắm tại <strong>BeautyCosmetic</strong>.</p>
 
-    <a href="@Url.Action("Detail", "Order", new { id = Model.OrderId })" class="btn btn-danger">Xem hóa đơn</a>
-    <a href="@Url.Action("History", "Order")" class="btn btn-outline-secondary">Lịch sử đơn hàng</a>
-    <a href="@Url.Action("Index", "Product")" class="btn btn-outline-secondary">Tiếp tục mua sắm</a>
+    <div class="card p-3 mx-auto shadow-sm border mb-4 text-start" style="max-width: 520px; border-radius: 12px;">
+        <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-muted">Mã đơn hàng:</span>
+            <strong class="text-danger fs-5">#@Model.OrderId</strong>
+        </div>
+        <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-muted">Hình thức thanh toán:</span>
+            <strong>@(Model.PaymentMethod == "BankTransfer" ? "Chuyển khoản ngân hàng (MBBank)" : "Thanh toán khi nhận hàng (COD)")</strong>
+        </div>
+        <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-muted">Tổng tiền cần thanh toán:</span>
+            <strong class="text-danger fs-4 fw-bold">@Model.TotalAmount.ToString("N0") ₫</strong>
+        </div>
+
+        @if (Model.PaymentMethod == "BankTransfer")
+        {
+            <div class="mt-3 p-3 rounded-3" style="background: #F0F7FF; border: 1px solid #90CAF9;">
+                <div class="fw-bold text-primary mb-2 text-center">
+                    <i class="fas fa-qrcode me-1"></i> Quét mã để thanh toán đơn hàng #@Model.OrderId
+                </div>
+                <div class="text-center my-2">
+                    <img src="https://img.vietqr.io/image/MB-0768873317-compact2.png?amount=@((int)Model.TotalAmount)&addInfo=BEAUTY%20DH%20@Model.OrderId&accountName=TRAN%20KHANH%20VINH"
+                         alt="QR MBBank"
+                         style="max-width: 220px; width: 100%; border-radius: 10px; border: 2px solid #1a73e8; background: #fff; padding: 4px;"
+                         onerror="this.onerror=null; this.src='@Url.Content("~/Images/mbbank-qr.jpg")';" />
+                </div>
+                <div class="small mt-2">
+                    <div>Ngân hàng: <strong>MBBank</strong></div>
+                    <div>Chủ tài khoản: <strong>TRAN KHANH VINH</strong></div>
+                    <div>Số tài khoản: <strong class="text-danger fs-6">0768873317</strong></div>
+                    <div>Nội dung CK: <strong class="text-primary">BEAUTY DH @Model.OrderId</strong></div>
+                </div>
+                <div class="alert alert-info py-2 px-3 small mt-2 mb-0">
+                    <i class="fas fa-info-circle me-1"></i> Đơn hàng sẽ được nhân viên duyệt và gửi đi ngay sau khi nhận được thông báo chuyển khoản.
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="d-flex justify-content-center gap-2 flex-wrap">
+        <a href="@Url.Action("Detail", "Order", new { id = Model.OrderId })" class="btn btn-danger px-4 font-weight-bold">
+            <i class="fas fa-file-invoice me-1"></i> Xem chi tiết đơn
+        </a>
+        <a href="@Url.Action("History", "Order")" class="btn btn-outline-secondary px-3">
+            <i class="fas fa-history me-1"></i> Lịch sử đơn hàng
+        </a>
+        <a href="@Url.Action("Index", "Product")" class="btn btn-outline-secondary px-3">
+            <i class="fas fa-shopping-bag me-1"></i> Tiếp tục mua sắm
+        </a>
+    </div>
 </section>

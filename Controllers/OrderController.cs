@@ -238,7 +238,7 @@ namespace nv3.Controllers
                 UserId = CurrentCustomerId,
                 OrderDate = DateTime.Now,
                 OrderStatus = DefaultOrderStatus,
-                PaymentMethod = DefaultPaymentMethod,
+                PaymentMethod = (model.PaymentMethod == "BankTransfer") ? "BankTransfer" : "COD",
                 PaymentStatus = DefaultPaymentStatus,
                 ShippingAddress = shipping,
                 TotalAmount = total
