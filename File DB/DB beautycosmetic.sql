@@ -1,6 +1,4 @@
-﻿-- host_setup.sql: tao bang + du lieu mau cho database tren MonsterASP
-
-SET ANSI_NULLS ON
+﻿SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO

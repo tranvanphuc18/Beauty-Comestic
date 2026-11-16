@@ -250,6 +250,7 @@
     <Content Include="Models\BeautyCosmeticModel.edmx.diagram">
       <DependentUpon>BeautyCosmeticModel.edmx</DependentUpon>
     </Content>
+    <Content Include="File DB\README.md" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -304,6 +305,9 @@
     <Content Include="Views\AdminOrder\Index.cshtml" />
     <Content Include="Views\AdminDashboard\Index.cshtml" />
     <Content Include="Views\Shared\_CategoryMenu.cshtml" />
+    <Content Include="Views\AdminVoucher\Create.cshtml" />
+    <Content Include="Views\AdminVoucher\Edit.cshtml" />
+    <Content Include="Views\AdminVoucher\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
