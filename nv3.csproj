@@ -195,8 +195,9 @@
     <Compile Include="ViewModels\HomeViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="BeautyCosmeticDB%281%29.sql" />
-    <Content Include="BeautyCosmeticDB_Full.sql" />
+    <Content Include="File DB\Create_Vouchers_Table.sql" />
+    <Content Include="File DB\BeautyCosmeticDB%281%29.sql" />
+    <Content Include="File DB\BeautyCosmeticDB_Full.sql" />
     <Content Include="Content\account-menu.css" />
     <Content Include="Content\account.css" />
     <Content Include="Content\bootstrap-grid.css" />
@@ -218,13 +219,14 @@
     <Content Include="Content\home.css" />
     <Content Include="Content\product-filter.css" />
     <Content Include="favicon.ico" />
-    <Content Include="Order_IDs_Sequence.sql" />
+    <Content Include="File DB\Order_IDs_Sequence.sql" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
     <Content Include="Images\anessa.jpg" />
     <Content Include="Images\ceraVe.jpg" />
     <Content Include="Images\klairs.jpg" />
     <Content Include="Images\larocheposay.jpg" />
+    <Content Include="Images\mbbank-qr.jpg" />
     <Content Include="Images\melano.jpg" />
     <Content Include="Images\ysl.jpg" />
     <Content Include="Models\BeautyCosmeticModel.Context.tt">
@@ -264,7 +266,7 @@
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\product-filter.js" />
     <Content Include="Scripts\site.js" />
-    <Content Include="SQLQuery3.sql" />
+    <Content Include="File DB\SQLQuery3.sql" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
