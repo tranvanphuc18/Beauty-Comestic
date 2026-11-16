@@ -195,9 +195,6 @@
     <Compile Include="ViewModels\HomeViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="File DB\Create_Vouchers_Table.sql" />
-    <Content Include="File DB\BeautyCosmeticDB%281%29.sql" />
-    <Content Include="File DB\BeautyCosmeticDB_Full.sql" />
     <Content Include="Content\account-menu.css" />
     <Content Include="Content\account.css" />
     <Content Include="Content\bootstrap-grid.css" />
@@ -219,7 +216,7 @@
     <Content Include="Content\home.css" />
     <Content Include="Content\product-filter.css" />
     <Content Include="favicon.ico" />
-    <Content Include="File DB\Order_IDs_Sequence.sql" />
+    <Content Include="File DB\DB beautycosmetic.sql" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
     <Content Include="Images\anessa.jpg" />
@@ -266,7 +263,6 @@
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\product-filter.js" />
     <Content Include="Scripts\site.js" />
-    <Content Include="File DB\SQLQuery3.sql" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
